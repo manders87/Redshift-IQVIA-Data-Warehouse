@@ -1,0 +1,42 @@
+DROP VIEW IF EXISTS rpt_apollo.v_tab_Geography_Attributes;
+
+CREATE VIEW rpt_apollo.v_tab_Geography_Attributes AS
+(SELECT position_id,
+        --Position 
+   pos_salesforce_value as "Salesforce Value"       ,
+--Any overlay positions are considered as separate territory types   
+   case when pos_salesforce_value LIKE '%_O' THEN pos_salesforce_value else pos_type end as "Territory Type"                ,
+   pos_type_flag as  "Active Territory Flag",
+   --SalesForce Geography
+   phi_top_hl_position_id as "Salesforce Geography Id"    ,
+   phi_top_hl_position_name as "Salesforce Geography"       ,
+   -- Area
+   phi_hl8_position_id  as "Area Id"        ,
+   phi_hl8_position_name   as "Area"     ,
+   --Region
+   phi_hl7_position_id    as "Region Id"      ,
+   phi_hl7_position_name  as "Region"     ,
+   --District
+   phi_hl6_position_id  as "District Id"        ,
+   phi_hl6_position_name  as  "District"      ,
+   --POD
+   phi_hl5_position_id   as "Pod Id"       ,
+   phi_hl5_position_name   as "Pod"     ,
+   --Territory
+   phi_hl4_position_id  as "Territory Id"        ,
+   phi_hl4_position_name    as "Territory"    ,
+--Geo Archtype is used by the AOM business and is unique across POA periods   
+    psg_archetype_flag as "Geo Archtype"
+	   FROM rpt_apollo.ptab_d_position_full
+where poa_active_flag = 'CURRENT' and phi_row_number < 2 
+)
+WITH NO SCHEMA BINDING;
+
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.v_tab_Geography_Attributes TO oasis_cdw_tst_procuser;
+GRANT SELECT ON rpt_apollo.v_tab_Geography_Attributes TO group oasis_cdw_tst_readuser_group;
+
+-- Check for Compile of VIEW
+SELECT *
+FROM rpt_apollo.v_tab_Geography_Attributes
+LIMIT 1;
+

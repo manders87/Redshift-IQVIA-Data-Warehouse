@@ -1,0 +1,35 @@
+-- Semantic view to connect to flattened dimensional table
+
+CREATE OR REPLACE VIEW rpt_apollo.v_tab_Account_Attributes AS
+(
+SELECT 
+account_id,
+acc_hcos_id as "hcos Id",
+acc_source_unique_id as "Account CDM Id",
+acc_subtype_code as "Account CDM Subtype",
+acc_type_code as "Account CDM Type",
+ahi_lvl7anc_accnt_id as "Facility Id",
+ahi_lvl7anc_accnt_name as Facility,
+ahi_lvl8anc_accnt_id as "Division Id",
+ahi_lvl8anc_accnt_name as Division,
+ahi_top_lvl_accnt_id as "IDN Id",
+ahi_top_lvl_accnt_name as IDN,
+ahi_true_level as "True Level"
+FROM rpt_apollo.ptab_d_account_full acc
+--Matching account_id count and not duplicating
+where acc_row_number = 1
+)
+WITH NO SCHEMA BINDING;
+
+-- Granting read only access to read group and full control to ETL user
+
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.v_tab_Account_Attributes TO oasis_cdw_tst_procuser;
+GRANT SELECT ON rpt_apollo.v_tab_Account_Attributes TO group oasis_cdw_tst_readuser_group;
+
+
+-- Check for Compile of VIEW
+SELECT *
+FROM rpt_apollo.v_tab_Account_Attributes
+LIMIT 1;
+
+

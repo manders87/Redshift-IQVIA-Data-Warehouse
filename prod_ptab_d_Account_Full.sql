@@ -1,0 +1,309 @@
+--Creating de-normalized dimension table with all attributes for time
+-- REM Add compression encoding
+-- REM Add sort key & distribution
+-- Flattened Account Table is around 5 million rows vs. 1 million for d_account and distributed to all nodes 
+
+
+--Adding Start Time
+--Updating latest run stats to apollo control table
+UPDATE rpt_apollo.apollo_control_table
+set last_start_date = getdate(), status = 'Started' 
+WHERE sql_file_name = :'sqlfilename';
+
+
+
+CREATE TABLE IF NOT EXISTS :loadschema.ptab_d_account_full_new
+(
+   account_id                 bigint ENCODE ZSTD  NOT NULL ,
+   acc_source_unique_id           varchar(30)  ENCODE ZSTD,
+   acc_name                       varchar(200)  ENCODE ZSTD,
+   acc_abbr_name                  varchar(100)  ENCODE ZSTD,
+   acc_supertype_code             varchar(50)  ENCODE ZSTD,
+   acc_supertype_name             varchar(100)  ENCODE ZSTD,
+   acc_type_code                  varchar(50)  ENCODE ZSTD,
+   acc_type_name                  varchar(100)  ENCODE ZSTD,
+   acc_subtype_code               varchar(50)  ENCODE ZSTD,
+   acc_subtype_name               varchar(100)  ENCODE ZSTD,
+   acc_status                     varchar(100)  ENCODE ZSTD,
+   acc_accnt_address1             varchar(255)  ENCODE ZSTD,
+   acc_accnt_address2             varchar(255)  ENCODE ZSTD,
+   acc_accnt_city                 varchar(255)  ENCODE ZSTD,
+   acc_accnt_state                varchar(255)  ENCODE ZSTD,
+   acc_accnt_zip                  varchar(10)  ENCODE ZSTD,
+   acc_effective_start_date       date  ENCODE ZSTD,
+   acc_end_date                   date  ENCODE ZSTD,
+   acc_class_of_trade_code        varchar(50)  ENCODE ZSTD,
+   acc_class_of_trade_name        varchar(100)  ENCODE ZSTD,
+   acc_previous_source_unique_id  varchar(20)  ENCODE ZSTD,
+   acc_true_level                 varchar(100)  ENCODE ZSTD,
+   acc_hcos_id                    varchar(20)  ENCODE ZSTD,
+   acc_calculated_true_level      varchar(20)  ENCODE ZSTD,
+   ahi_account_hierarchy_id  bigint  ENCODE ZSTD,
+   ahi_fixed_hier_level      varchar(200)  ENCODE ZSTD,
+   ahi_lvl1anc_accnt_id      varchar(200)  ENCODE ZSTD,
+   ahi_lvl1anc_accnt_name    varchar(200)  ENCODE ZSTD,
+   ahi_lvl2anc_accnt_id      varchar(200)  ENCODE ZSTD,
+   ahi_lvl2anc_accnt_name    varchar(200)  ENCODE ZSTD,
+   ahi_lvl3anc_accnt_id      varchar(200)  ENCODE ZSTD,
+   ahi_lvl3anc_accnt_name    varchar(200)  ENCODE ZSTD,
+   ahi_lvl4anc_accnt_id      varchar(200)  ENCODE ZSTD,
+   ahi_lvl4anc_accnt_name    varchar(200)  ENCODE ZSTD,
+   ahi_lvl5anc_accnt_id      varchar(200)  ENCODE ZSTD,
+   ahi_lvl5anc_accnt_name    varchar(200)  ENCODE ZSTD,
+   ahi_lvl6anc_accnt_id      varchar(200)  ENCODE ZSTD,
+   ahi_lvl6anc_accnt_name    varchar(200)  ENCODE ZSTD,
+   ahi_lvl7anc_accnt_id      varchar(200)  ENCODE ZSTD,
+   ahi_lvl7anc_accnt_name    varchar(200)  ENCODE ZSTD,
+   ahi_lvl8anc_accnt_id      varchar(200)  ENCODE ZSTD,
+   ahi_lvl8anc_accnt_name    varchar(200)  ENCODE ZSTD,
+   ahi_top_lvl_accnt_id      varchar(200)  ENCODE ZSTD,
+   ahi_top_lvl_accnt_name    varchar(200)  ENCODE ZSTD,
+   ahi_active_flag           varchar(10)  ENCODE ZSTD,
+   ahi_true_level            varchar(200)  ,
+   aff_affiliation_rollup_id  bigint ENCODE ZSTD,
+   aff_affil_account_cdm_id   varchar(200) ENCODE ZSTD,
+   aff_affil_customer_cdm_id  varchar(200) ENCODE ZSTD,
+   aff_customer_id             bigint ENCODE ZSTD,
+   aff_level                  varchar(30) ENCODE ZSTD,
+   aff_affil_type             varchar(30) ENCODE ZSTD,
+   aff_idn_affiliation_flag   varchar(1) ENCODE ZSTD,
+   acc_row_number          bigint ENCODE ZSTD,
+   ahi_row_number		  bigint ENCODE ZSTD,
+   aff_row_number         bigint ENCODE ZSTD,
+   affiliation_deduplication_id bigint ENCODE ZSTD,
+   batch_id                       int     ENCODE ZSTD,
+   "Highest Affiliation Level"  varchar(30) ENCODE ZSTD
+   
+)
+DISTSTYLE ALL
+COMPOUND SORTKEY (aff_level, aff_row_number, ahi_top_lvl_accnt_id, ahi_lvl8anc_accnt_id, ahi_lvl7anc_accnt_id  );
+--Loading Data Into Table In Sort Key Order
+--REM Add Order By   
+   INSERT INTO :loadschema.ptab_d_account_full_new
+(
+   account_id                 ,
+   acc_source_unique_id           ,
+   acc_name                       ,
+   acc_abbr_name                  ,
+   acc_supertype_code             ,
+   acc_supertype_name             ,
+   acc_type_code                  ,
+   acc_type_name                  ,
+   acc_subtype_code               ,
+   acc_subtype_name               ,
+   acc_status                     ,
+   acc_accnt_address1             ,
+   acc_accnt_address2             ,
+   acc_accnt_city                 ,
+   acc_accnt_state                ,
+   acc_accnt_zip                  ,
+   acc_effective_start_date       ,
+   acc_end_date                   ,
+   acc_class_of_trade_code        ,
+   acc_class_of_trade_name        ,
+   acc_previous_source_unique_id  ,
+   acc_true_level                 ,
+   acc_hcos_id                    ,
+   acc_calculated_true_level      ,
+   ahi_account_hierarchy_id  ,
+   ahi_fixed_hier_level      ,
+   ahi_lvl1anc_accnt_id      ,
+   ahi_lvl1anc_accnt_name    ,
+   ahi_lvl2anc_accnt_id      ,
+   ahi_lvl2anc_accnt_name    ,
+   ahi_lvl3anc_accnt_id      ,
+   ahi_lvl3anc_accnt_name    ,
+   ahi_lvl4anc_accnt_id      ,
+   ahi_lvl4anc_accnt_name    ,
+   ahi_lvl5anc_accnt_id      ,
+   ahi_lvl5anc_accnt_name    ,
+   ahi_lvl6anc_accnt_id      ,
+   ahi_lvl6anc_accnt_name    ,
+   ahi_lvl7anc_accnt_id      ,
+   ahi_lvl7anc_accnt_name    ,
+   ahi_lvl8anc_accnt_id      ,
+   ahi_lvl8anc_accnt_name    ,
+   ahi_top_lvl_accnt_id      ,
+   ahi_top_lvl_accnt_name    ,
+   ahi_active_flag           ,
+   ahi_true_level            ,
+   aff_affiliation_rollup_id  ,
+   aff_affil_account_cdm_id   ,
+   aff_affil_customer_cdm_id  ,
+   aff_customer_id            ,
+   aff_level                  ,
+   aff_affil_type            ,
+   aff_idn_affiliation_flag  ,
+   acc_row_number,
+   ahi_row_number		  ,
+   aff_row_number    ,
+   affiliation_deduplication_id,
+   batch_id,
+   "Highest Affiliation Level"
+)
+(
+--Flattened Account Table is around 5 million rows.  Distributing to all nodes.
+SELECT
+   account_id                 ,
+   source_unique_id           ,
+   name                       ,
+   abbr_name                  ,
+   supertype_code             ,
+   supertype_name             ,
+   type_code                  ,
+   type_name                  ,
+   subtype_code               ,
+   subtype_name               ,
+   status                     ,
+   accnt_address1             ,
+   accnt_address2             ,
+   accnt_city                 ,
+   accnt_state                ,
+   accnt_zip                  ,
+   effective_start_date       ,
+   end_date                   ,
+   class_of_trade_code        ,
+   class_of_trade_name        ,
+   previous_source_unique_id  ,
+   acc_true_level                 ,
+   hcos_id                    ,
+   calculated_true_level      ,
+   account_hierarchy_id  ,
+   fixed_hier_level      ,
+   lvl1anc_accnt_id      ,
+   lvl1anc_accnt_name    ,
+   lvl2anc_accnt_id      ,
+   lvl2anc_accnt_name    ,
+   lvl3anc_accnt_id      ,
+   lvl3anc_accnt_name    ,
+   lvl4anc_accnt_id      ,
+   lvl4anc_accnt_name    ,
+   lvl5anc_accnt_id      ,
+   lvl5anc_accnt_name    ,
+   lvl6anc_accnt_id      ,
+   lvl6anc_accnt_name    ,
+   lvl7anc_accnt_id      ,
+   lvl7anc_accnt_name    ,
+   lvl8anc_accnt_id      ,
+   lvl8anc_accnt_name    ,
+   top_lvl_accnt_id      ,
+   top_lvl_accnt_name    ,
+   active_flag           ,
+   ahi_true_level            ,
+   affiliation_rollup_id  ,
+   affil_account_cdm_id   ,
+   affil_customer_cdm_id  ,
+   customer_id            ,
+   level                  ,
+   affil_type            ,
+   idn_affiliation_flag  ,
+   row_number () over (partition by account_id ORDER BY account_hierarchy_id, affiliation_rollup_id) as acc_row_number,
+   case when ahi_account_id is null then 0 else row_number () over (partition by account_id, account_hierarchy_id  ORDER BY account_hierarchy_id, affiliation_rollup_id) end as ahi_row_number,
+   case when aff_account_id is null then 0 else row_number () over (PARTITION BY account_id, affiliation_rollup_id ORDER BY account_hierarchy_id, affiliation_rollup_id) end as aff_row_number,
+   case when count(*) over (partition by customer_id) = 1 then 0  else customer_id end,
+   :batchid,
+   CASE 
+   max(
+   case level 
+   WHEN 'CORP PARENT' THEN 4
+   WHEN 'SUB DIVISION' THEN 3
+   WHEN 'FACILITY' THEN 2
+   else 1
+   end) OVER (PARTITION BY customer_id)
+   WHEN 4 then 'CORP PARENT'
+   WHEN 3 THEN 'SUB DIVISION'
+   WHEN 2 THEN 'FACILITY' 
+   else 'UNAFFILIATED'
+   end 
+   
+  
+FROM	  
+	  
+   (
+   SELECT 
+   acc.account_id                 ,
+   ahi.account_id as ahi_account_id,
+   aff.account_id as aff_account_id,
+   acc.source_unique_id           ,
+   acc.name                       ,
+   acc.abbr_name                  ,
+   acc.supertype_code             ,
+   acc.supertype_name             ,
+   acc.type_code                  ,
+   acc.type_name                  ,
+   acc.subtype_code               ,
+   acc.subtype_name               ,
+   acc.status                     ,
+   acc.accnt_address1             ,
+   acc.accnt_address2             ,
+   acc.accnt_city                 ,
+   acc.accnt_state                ,
+   acc.accnt_zip                  ,
+   acc.effective_start_date       ,
+   acc.end_date                   ,
+   acc.class_of_trade_code        ,
+   acc.class_of_trade_name        ,
+   acc.previous_source_unique_id  ,
+   acc.true_level  as acc_true_level               ,
+   acc.hcos_id                    ,
+   acc.calculated_true_level      ,
+   ahi.account_hierarchy_id  ,
+   ahi.fixed_hier_level      ,
+   ahi.lvl1anc_accnt_id      ,
+   ahi.lvl1anc_accnt_name    ,
+   ahi.lvl2anc_accnt_id      ,
+   ahi.lvl2anc_accnt_name    ,
+   ahi.lvl3anc_accnt_id      ,
+   ahi.lvl3anc_accnt_name    ,
+   ahi.lvl4anc_accnt_id      ,
+   ahi.lvl4anc_accnt_name    ,
+   ahi.lvl5anc_accnt_id      ,
+   ahi.lvl5anc_accnt_name    ,
+   ahi.lvl6anc_accnt_id      ,
+   ahi.lvl6anc_accnt_name    ,
+   ahi.lvl7anc_accnt_id      ,
+   ahi.lvl7anc_accnt_name    ,
+   ahi.lvl8anc_accnt_id      ,
+   ahi.lvl8anc_accnt_name    ,
+   ahi.top_lvl_accnt_id      ,
+   ahi.top_lvl_accnt_name    ,
+   ahi.active_flag           ,
+   ahi.true_level       as ahi_true_level     ,
+   aff.affiliation_rollup_id  ,
+   aff.affil_account_cdm_id   ,
+   aff.affil_customer_cdm_id  ,
+   aff.customer_id            ,
+   aff.level                  ,
+   aff.affil_type            ,
+   aff.idn_affiliation_flag  
+FROM
+:sourcedims.d_account acc
+LEFT JOIN
+:sourcedims.d_account_hierarchy ahi
+ON acc.account_id=ahi.account_id
+LEFT JOIN
+:sourcedims.d_affiliation_rollup aff
+on acc.account_id = aff.account_id
+))
+;
+
+
+
+VACUUM FULL :loadschema.ptab_d_account_full_new TO 99 PERCENT;
+ANALYZE :loadschema.ptab_d_account_full_new;
+
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON :loadschema.ptab_d_account_full_new TO :etluser;
+GRANT SELECT ON :loadschema.ptab_d_account_full_new TO :readonlyusers;
+GRANT SELECT ON :loadschema.ptab_d_account_full_new TO :readonlygroups;
+
+DROP TABLE IF EXISTS :loadschema.ptab_d_account_full_old;
+
+ALTER TABLE :loadschema.ptab_d_account_full RENAME TO ptab_d_account_full_old;
+
+ALTER TABLE :loadschema.ptab_d_account_full_new RENAME TO ptab_d_account_full;
+
+
+--Updating latest run stats to apollo control table
+UPDATE rpt_apollo.apollo_control_table
+set status = 'Successfully Completed', batch_id = :batchid, last_loaded_date = getdate() ,total_records_loaded =  (SELECT count(*) from :loadschema.ptab_d_account_full)
+WHERE sql_file_name = :'sqlfilename';

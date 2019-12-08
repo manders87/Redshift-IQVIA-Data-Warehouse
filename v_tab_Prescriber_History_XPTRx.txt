@@ -1,0 +1,43 @@
+DROP VIEW IF EXISTS rpt_apollo.v_tab_Prescriber_History_XPTRx;
+
+CREATE VIEW rpt_apollo.v_tab_Prescriber_History_XPTRx AS
+(
+SELECT trx.xpt_trx_ins_niad_aob_id,
+       trx.poa_id as "POA id",
+       trx.apportionment_niad_trx AS "Apportioned TRx Volume",
+       trx.apportionment_niad_nrx as "Apportioned NIAD NRx Volume",
+       trx.apportionment_trx AS "Apportioned SU Volume",
+       trx.apportionment_nrx as "Apportioned NRx Volume",
+       trx.category as "Category",
+       trx.zip as "TRx Zip",
+       trx.brand_eligibility_flag as "Brand Eligibility Flag",
+       trx.first_time_writer_flag as "First Time Writer Flag",
+       trx.recurrent_writer_flag as "Recurrent Writer Flag",
+       trx.recurrent_writer_alt_flag as "Recurrent Writer Alt Flag",
+	   trx.plan_exclusion_flag as "Plan Exclusion Flag",
+	   -- For performance on Redshift the most commonly and highly specific attributes have been added directly to the performance fact tables	
+	   trx.territory_type as "Territory Type" ,
+       trx.week_ending_date as "Week Ending Date",
+       trx.day as "Day",
+	   trx.market as "Market",
+	   trx.therapeutic_class as "Therapeutic Class",
+       trx.therapeutic_sub_class as "Therapeutic Sub-Class",
+	   customer_id,
+       position_id,
+	  day_id,
+	   product_id,
+	   plan_id   ,
+	  0 as overlay_deduplication_factor,
+          0 as overlay_position_id
+FROM rpt_apollo.ptab_f_sales_xptrx_terr trx
+
+)
+WITH NO SCHEMA BINDING;
+
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.v_tab_Prescriber_History_XPTRx TO oasis_cdw_tst_procuser;
+GRANT SELECT ON rpt_apollo.v_tab_Prescriber_History_XPTRx TO group oasis_cdw_tst_readuser_group;	
+
+-- Check for Compile of VIEW
+SELECT *
+FROM rpt_apollo.v_tab_Prescriber_History_XPTRx
+LIMIT 1;

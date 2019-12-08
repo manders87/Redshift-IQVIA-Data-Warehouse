@@ -1,0 +1,59 @@
+DROP VIEW IF EXISTS rpt_apollo.v_tab_Product_Attributes;
+
+CREATE VIEW rpt_apollo.v_tab_Product_Attributes AS
+(
+SELECT product_id,
+        ---Products
+  prd_chemical_entiry_description as  "Chemical Name",
+  prd_device_code_description as Device,
+  prd_form_description as "Delivery Form",
+  prd_generic_indicator as "Generic Indicator",
+  prd_manufacturer_name as manufacturer,
+  nvl(prd_molecule_name, 
+  case when prh_hierarchy_lvl < 7  
+  then prh_hl6_product_name end) as "Molecule Name",
+  --Market
+  case when prh_hierarchy_lvl < 12
+  then prh_top_hl_prod_name 
+  end as Market,
+  --Therapeutic_Category
+  case when prh_hierarchy_lvl < 11
+  then prh_h10_product_name 
+  end as "Therapeutic Category",
+  --Therapeutic_Class
+  case when prh_hierarchy_lvl < 10
+  then prh_hl9_product_name 
+  end as "Therapeutic Class",
+  --Therapeutic_Sub_Class
+  case when prh_hierarchy_lvl < 9
+  then prh_hl8_product_name 
+  end as "Therapeutic Sub-Class",
+  --Product_Franchise
+  case when  prh_hierarchy_lvl < 8
+  then prh_hl7_product_name
+  end  as "Product Franchise",
+  --Brand
+  case when prh_hierarchy_lvl < 7  
+  then prh_hl6_product_name
+  end   as Brand,
+  --Form_Strength
+  case when prh_hierarchy_lvl < 6 
+  then prh_hl5_product_name
+  end  as "Form Strength"
+FROM rpt_apollo.ptab_d_product_full
+-- Equivalent to Inner Joining on Product Hierarchy
+where prh_row_number = 1
+)
+WITH NO SCHEMA BINDING;
+
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.v_tab_Product_Attributes TO oasis_cdw_tst_procuser;
+GRANT SELECT ON rpt_apollo.v_tab_Product_Attributes TO group oasis_cdw_tst_readuser_group;
+
+-- Check for Compile of VIEW
+SELECT *
+FROM rpt_apollo.v_tab_Product_Attributes
+LIMIT 1;
+
+
+		
+		

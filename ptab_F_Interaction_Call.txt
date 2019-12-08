@@ -1,0 +1,250 @@
+--Include all keys and fact attributes from f_interactions_call and excludes deleted records
+--Include most commonly used dimensional attributes with high cardinality (territory_type, therapeutic_class, therapeutic_sub_class)
+
+--Creating fact table that includes commonly used dimensional attributes
+-- REM Add compression encoding
+-- REM Add sort key & distribution
+-- All sort keys should be encoded raw and all other fields set to ZSTD encoding
+-- Fact tables should be distributed even or keyed on the largest dimensional table commonly joined
+
+DROP TABLE IF EXISTS rpt_apollo.ptab_f_interactions_call_curr_old;
+
+
+CREATE TABLE IF NOT EXISTS rpt_apollo.ptab_f_interactions_call_curr_new
+(
+  interaction_id               bigint   ENCODE ZSTD,
+   is_parent_call               varchar(1)   ENCODE ZSTD,
+   detail_priority              numeric(2)   ENCODE ZSTD,
+   quantity                     numeric(22,7)   ENCODE ZSTD,
+   child_ld						varchar(255)    ENCODE ZSTD,
+   pre_call_notes               varchar(255)   ENCODE ZSTD,
+   discussion_num_of_attendees  numeric(22)   ENCODE ZSTD,
+   clm_id                       varchar(100)   ENCODE ZSTD,
+   display_order                numeric(22)   ENCODE ZSTD,
+   presentation_id              varchar(100)   ENCODE ZSTD,
+   slide_version                varchar(100)   ENCODE ZSTD,
+   key_message_start_time       timestamp   ENCODE ZSTD,
+   Call_Name                    varchar(80)   ENCODE ZSTD,
+   interaction_call_id          varchar(255)   ENCODE ZSTD,
+   datasource_id                varchar(30)  ,
+   account_id                   bigint   ENCODE ZSTD NOT NULL,
+   customer_id                  bigint  ENCODE ZSTD NOT NULL,
+   product_id                   bigint   ENCODE ZSTD NOT NULL,
+   employee_id                  bigint   ENCODE ZSTD ,
+   position_id                  bigint   ENCODE ZSTD NOT NULL,
+   day_id                       bigint   ENCODE ZSTD NOT NULL,
+   address_id                   bigint   ENCODE ZSTD,
+   isdeleted                    varchar(1)   ENCODE ZSTD,
+   territory_type            varchar(100) ,
+   market                    varchar(100) ENCODE ZSTD ,
+   therapeutic_class          varchar(100) ENCODE ZSTD,
+   therapeutic_sub_class      varchar(100)  ENCODE ZSTD,
+   week_ending_date           date         ENCODE ZSTD,
+   "day"                      date         ENCODE ZSTD,
+   source_unique_id           varchar(255)  ENCODE ZSTD,
+   --Add LOV tables for each LID
+   attendee_type       varchar(100)   ENCODE ZSTD,	
+   call_type              varchar(100)   ENCODE ZSTD,	
+   interaction_sub_type     varchar(100)   ENCODE ZSTD,	
+   interaction_type       varchar(100)   ENCODE ZSTD,	
+   detail_type              varchar(100)   ENCODE ZSTD,	
+   delivery_status          varchar(100)   ENCODE ZSTD,	
+   child_type               varchar(100)   ENCODE ZSTD,	
+   product_type             varchar(100)   ENCODE ZSTD,	
+   discussion_topics        varchar(100)   ENCODE ZSTD,	
+   product_strategy         varchar(100)   ENCODE ZSTD,	
+   clinical_research        varchar(100)   ENCODE ZSTD,	
+   discussion_class         varchar(100)   ENCODE ZSTD,	
+   device_trained           varchar(100)   ENCODE ZSTD,	
+   call_focus               varchar(100)   ENCODE ZSTD,	
+   category                 varchar(100)   ENCODE ZSTD,	
+   reaction                 varchar(100)   ENCODE ZSTD,	
+   activity_type            varchar(100)   ENCODE ZSTD,	
+   call_status              varchar(100)   ENCODE ZSTD,	
+   --Address Attributes
+    Street_Address			varchar(110)  ENCODE ZSTD,
+	Best_Address_Flag		varchar(1)    ENCODE ZSTD,
+	City					varchar(50)	  ENCODE ZSTD,
+	Zipcode				    varchar(10)	  ENCODE ZSTD,
+	State                   varchar(50)   ENCODE ZSTD,
+  -- Employee Number
+    Employee_Login			varchar(5)	  ENCODE ZSTD
+  
+)	
+COMPOUND SORTKEY (datasource_id, territory_type, market, therapeutic_class, therapeutic_sub_class, week_ending_date, day)   
+;
+--Loading Data Into Table In Sort Key Order
+--REM Add Order By   
+   INSERT INTO rpt_apollo.ptab_f_interactions_call_curr_new
+(
+    interaction_id,
+       is_parent_call,
+       detail_priority,
+       quantity,
+	   child_ld,
+       pre_call_notes,
+       discussion_num_of_attendees,
+       clm_id,
+       display_order,
+       presentation_id,
+       slide_version,
+       key_message_start_time,
+       call_name,
+       interaction_call_id,
+       datasource_id,
+       account_id,
+       customer_id,
+       product_id,
+       employee_id,
+       position_id,
+       day_id,
+       address_id,
+       isdeleted,
+	   territory_type,
+       market,
+       therapeutic_class,
+       therapeutic_sub_class,
+       week_ending_date,
+       "day",
+	    source_unique_id   ,
+       attendee_type,
+       call_type,
+       interaction_sub_type,
+       interaction_type,
+       detail_type,
+       delivery_status,
+       child_type,
+       product_type,
+       discussion_topics,
+       product_strategy,
+       clinical_research,
+       discussion_class,
+       device_trained,
+       call_focus,
+       category,
+       reaction,
+       activity_type,
+       call_status,
+       street_address,
+       best_address_flag,
+       city,
+       zipcode,
+       state,
+       employee_login
+)
+(
+--Recommend to use Even distribution or Key distribution on customer_id if customer_id is equally distributed over commonly used query domain
+SELECT 
+  f_interactions_call.interaction_id               ,
+   CASE f_interactions_call.is_parent_call              
+   when 1 then 'Y'
+   else 'N'
+   end   ,
+   f_interactions_call.detail_priority              ,
+   f_interactions_call.quantity                     ,
+   f_interactions_call.child_ld                     ,
+   f_interactions_call.pre_call_notes               ,
+   f_interactions_call.discussion_num_of_attendees  ,
+   f_interactions_call.clm_id                       ,
+   f_interactions_call.display_order                ,
+   f_interactions_call.presentation_id              ,
+   f_interactions_call.slide_version                ,
+   f_interactions_call.key_message_start_time       ,
+   f_interactions_call.call_alt_id                  ,
+   f_interactions_call.interaction_call_id          ,
+   f_interactions_call.datasource_id                ,
+   NVL(f_interactions_call.account_id, -99999)                 ,
+   NVL(f_interactions_call.customer_id , -99999)                 ,
+   NVL(f_interactions_call.product_id   , -99999)                ,
+   f_interactions_call.employee_id                  ,
+   NVL(f_interactions_call.position_id  , -99999)                ,
+   NVL(f_interactions_call.day_id     , -99999)                  ,
+   f_interactions_call.address_id                   ,
+   f_interactions_call.isdeleted                   ,
+   case when pos.salesforce_value LIKE '%_O' THEN pos.salesforce_value else pos.type end as territory_type ,
+   case when prh_hierarchy_lvl < 12
+  then prh_top_hl_prod_name 
+  end as market,
+  case when prh_hierarchy_lvl < 10
+  then prh_hl9_product_name 
+  end as therapeutic_class,
+   case when prh_hierarchy_lvl < 9
+  then prh_hl8_product_name 
+  end as therapeutic_sub_class,
+   day.d_split_week_ending_date,
+   day.d_day_dt,
+    f_interactions_call.source_unique_id   ,
+   attendee_type_lov.value            ,	
+   call_type_lov.value                ,	
+   interaction_sub_type_lov.value     ,	
+   interaction_type_lov.value         ,	
+   detail_type_lov.value              ,	
+   delivery_status_lov.value          ,	
+   child_type_lov.value               ,	
+   product_type_lov.value             ,	
+   discussion_topics_lov.value        ,	
+   product_strategy_lov.value         ,	
+   clinical_research_lov.value        ,	
+   discussion_class_lov.value         ,	
+   device_trained_lov.value           ,	
+   call_focus_lov.value               ,	
+   category_lov.value                 ,	
+   reaction_lov.value                 ,	
+   activity_type_lov.value            ,	
+   call_status_lov.value              ,	
+   add.addr_ln1_txt,
+   add.best_addr_ind,
+   add.city_nm,
+   add.postl_cd,
+   add.st_provn_cd,
+   emp.emp_initials		
+   
+
+FROM
+ rpt_facts.f_interactions_call f_interactions_call
+	LEFT JOIN rpt_dims.d_address add on (f_interactions_call.address_id = add.address_id)
+	LEFT JOIN rpt_dims.d_employee emp on (f_interactions_call.employee_id = emp.employee_id)
+	INNER JOIN rpt_dims.d_position pos ON (f_interactions_call.position_id = pos.position_id)
+	  LEFT JOIN rpt_apollo.ptab_d_product_full prod on prod.product_id = f_interactions_call.product_id
+  LEFT JOIN rpt_apollo.ptab_d_day_full day on day.day_id = f_interactions_call.day_id
+-- Left Joining the LOV tables in case a term definition is missing	
+	LEFT JOIN rpt_dims.d_lov call_type_lov ON (f_interactions_call.call_type_lid = call_type_lov.lov_id and call_type_lov.type = 'CALL_TYPE_LID')
+	LEFT JOIN rpt_dims.d_lov interaction_sub_type_lov ON (f_interactions_call.interaction_sub_type_lid = interaction_sub_type_lov.lov_id and interaction_sub_type_lov.type ='INTERACTION_SUB_TYPE')
+	LEFT JOIN rpt_dims.d_lov interaction_type_lov ON (f_interactions_call.interaction_type_lid = interaction_type_lov.lov_id and interaction_type_lov.type ='INTERACTION_TYPE')
+	LEFT JOIN rpt_dims.d_lov detail_type_lov ON (f_interactions_call.detail_type_lid = detail_type_lov.lov_id and detail_type_lov.type = 'DETAIL_TYPE_LID')
+	LEFT JOIN rpt_dims.d_lov delivery_status_lov ON (f_interactions_call.delivery_status_lid = delivery_status_lov.lov_id and delivery_status_lov.type = 'DELIVERY_STATUS_LID')
+	LEFT JOIN rpt_dims.d_lov child_type_lov ON (f_interactions_call.child_type_lid = child_type_lov.lov_id and child_type_lov.type = 'CHILD_TYPE_LID')
+	LEFT JOIN rpt_dims.d_lov product_type_lov ON (f_interactions_call.product_type_lid = product_type_lov.lov_id and product_type_lov.type ='PRODUCT_TYPE')
+	LEFT JOIN rpt_dims.d_lov discussion_topics_lov ON (f_interactions_call.discussion_topics_lid = discussion_topics_lov.lov_id and discussion_topics_lov.type ='DISCUSSION_TOPICS_LID')
+	LEFT JOIN rpt_dims.d_lov product_strategy_lov ON (f_interactions_call.product_strategy_lid = product_strategy_lov.lov_id and product_strategy_lov.type = 'PRODUCT_STRATEGY_LID')
+	LEFT JOIN rpt_dims.d_lov clinical_research_lov ON (f_interactions_call.clinical_research_lid = clinical_research_lov.lov_id and clinical_research_lov.type = 'CLINICAL_RESEARCH_LID')
+	LEFT JOIN rpt_dims.d_lov discussion_class_lov ON (f_interactions_call.discussion_class_lid = discussion_class_lov.lov_id and discussion_class_lov.type = 'DISCUSSION_CLASS_LID')
+	LEFT JOIN rpt_dims.d_lov device_trained_lov ON (f_interactions_call.device_trained_lid = device_trained_lov.lov_id and device_trained_lov.type = 'DEVICE_TRAINED_LID')
+	LEFT JOIN rpt_dims.d_lov call_focus_lov ON (f_interactions_call.call_focus_lid = call_focus_lov.lov_id and call_focus_lov.type = 'CALL_FOCUS_LID')
+	LEFT JOIN rpt_dims.d_lov category_lov ON (f_interactions_call.category_lid = category_lov.lov_id and category_lov.type = 'CATEGORY')
+	LEFT JOIN rpt_dims.d_lov reaction_lov ON (f_interactions_call.reaction_lid = reaction_lov.lov_id and reaction_lov.type = 'REACTION_LID')
+	LEFT JOIN rpt_dims.d_lov activity_type_lov ON (f_interactions_call.activity_type_lid = activity_type_lov.lov_id and activity_type_lov.type = 'ACTIVITY_TYPE_LID')
+	LEFT JOIN rpt_dims.d_lov call_status_lov ON (f_interactions_call.call_status_lid = call_status_lov.lov_id and call_status_lov.type = 'CALL_STATUS_LID')
+    LEFT JOIN rpt_dims.d_lov attendee_type_lov ON (f_interactions_call.attendee_type_lid = attendee_type_lov.lov_id and attendee_type_lov.type = 'ATTENDEE_TYPE_LID')
+	
+WHERE f_interactions_call.isdeleted<>'Y' or f_interactions_call.isdeleted is null
+);
+
+VACUUM FULL  rpt_apollo.ptab_f_interactions_call_curr_new to 99 PERCENT;
+
+
+
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.ptab_f_interactions_call_curr_new TO oasis_cdw_tst_procuser;
+GRANT SELECT ON rpt_apollo.ptab_f_interactions_call_curr_new TO group oasis_cdw_tst_readuser_group;
+
+CREATE TABLE IF NOT EXISTS rpt_apollo.ptab_f_interactions_call_curr
+(
+  interaction_id               bigint   ENCODE ZSTD
+);
+
+
+ALTER TABLE  rpt_apollo.ptab_f_interactions_call_curr RENAME TO  ptab_f_interactions_call_curr_old;
+
+ALTER TABLE  rpt_apollo.ptab_f_interactions_call_curr_new RENAME TO  ptab_f_interactions_call_curr;
+
+

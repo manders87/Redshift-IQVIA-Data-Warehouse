@@ -1,0 +1,46 @@
+DROP VIEW IF EXISTS rpt_apollo.v_tab_Prescriber_Attributes_with_Masking_Geography;
+
+CREATE VIEW rpt_apollo.v_tab_Prescriber_Attributes_with_Masking_Geography AS
+(
+SELECT 
+   customer_id,
+   cus_designation_name as Title,
+   cus_first_name as "First Name",
+   cus_last_name as "Last Name",
+   cus_full_name as "Full Name",
+   cus_ims_id as "IMS Id",
+   cus_current_source_unique_id as "Prescriber CDM Id",
+   cus_no_contact_indicator as "AMA No Contact Flag",
+   cus_restricted_rx_data_ind as "PDRP Flag",
+   cus_me_number as "me #",
+   cus_npi_id as "NPI Id",
+   cus_pr_spec_code as "NNI Specialty Grouping",
+   cus_pr_spec_group as "NNI Specialty Description",
+   cus_pr_spec_name as Specialty,
+   cus_professional_type as "Credential Type",
+   cus_status as Status,
+   cus_subtype as "CDM Subtype",
+   cus_subtype as Credential,
+   cus_type as "Prescriber CDM Type",
+   cus_best_addr_street as "Best Street Address",
+   cus_best_addr_city as "Best City",
+   cus_best_addr_state as "Best State",
+   cus_best_addr_zipcode as "Best Zip",
+   case when cm_masking_flag = 'M' then 'Y' else 'N' end as "Masked Prescriber Flag",
+	cm_position_id as "Masked Prescriber Position",
+ diabetes_target_flag as "Diabetes Target Flag",
+   aom_target_flag as "AOM Target Flag"
+FROM rpt_apollo.ptab_d_customer_full
+where cm_row_number < 2
+)
+WITH NO SCHEMA BINDING;
+
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.v_tab_Prescriber_Attributes_with_Masking_Geography TO oasis_cdw_tst_procuser;
+GRANT SELECT ON rpt_apollo.v_tab_Prescriber_Attributes_with_Masking_Geography TO group oasis_cdw_tst_readuser_group;
+
+-- Check for Compile of VIEW
+SELECT *
+FROM rpt_apollo.v_tab_Prescriber_Attributes_with_Masking_Geography
+LIMIT 1;
+
+

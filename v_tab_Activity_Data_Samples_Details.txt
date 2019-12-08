@@ -1,0 +1,83 @@
+DROP VIEW IF EXISTS rpt_apollo.v_tab_Activity_Data_Samples_Details;
+
+CREATE VIEW rpt_apollo.v_tab_Activity_Data_Samples_Details AS
+(
+SELECT CASE
+   when datasource_id in ('OSS_CALL_DETAIL', 'VEEVA_CALL_DETAIL') AND call_type IN ('DETAIL ONLY', 'DETAIL WITH SAMPLE', 'GROUP DETAIL', 'GROUP DETAIL WITH SAMPLE')
+     then  interaction_call_id                      
+   END as Actual_Call,
+       is_parent_call as "Is Parent Call",
+       detail_priority as "Detail Priority",
+       quantity,
+	   f.territory_type as "Territory Type" ,
+       f.week_ending_date as "Week Ending Date",
+       f.day as "Day",
+	   f.market as "Market",
+	   f.therapeutic_class as "Therapeutic Class",
+       f.therapeutic_sub_class as "Therapeutic Sub-Class",
+	   CASE
+   when datasource_id in ('OSS_CALL_SAMPLE', 'VEEVA_CALL_SAMPLE') AND call_type IN ('DETAIL WITH SAMPLE', 'GROUP DETAIL WITH SAMPLE', 'SAMPLE ONLY')
+     then  quantity 
+     else 0 
+   END as "Sample Qty",
+   CASE
+   when datasource_id in ('OSS_CALL_DETAIL', 'VEEVA_CALL_DETAIL') AND call_type IN ('DETAIL ONLY', 'DETAIL WITH SAMPLE', 'GROUP DETAIL', 'GROUP DETAIL WITH SAMPLE')
+     then  child_ld                      
+   END as "Details",
+       pre_call_notes as "Pre Call Notes",
+       discussion_num_of_attendees as "Discussion # of Attendees",
+       display_order as "Display Order",
+       presentation_id,
+       slide_version as "Slide Version",
+       key_message_start_time as "Key Message Start Time",
+       call_name as "Call Name",
+       interaction_call_id as "Interaction Call Id",
+       datasource_id,
+       employee_id,
+       address_id,
+       attendee_type as "Attendee Type",
+       call_type as "Call Type",
+       interaction_sub_type as "Interaction Sub Type",
+       interaction_type as "Interaction Type",
+       detail_type as "Detail Type",
+       delivery_status as "Delivery Status",
+       child_type as "Child Type",
+       product_type as "Product Type",
+       discussion_topics as "Discussion Topics",
+       product_strategy as "Product Strategy",
+       clinical_research as "Clinical Research",
+       discussion_class as "Discussion Class",
+       device_trained as "Device Trained",
+       call_focus as "Call Focus",
+       category as "Category",
+       reaction as "Reaction",
+       activity_type as "Activity Type",
+       call_status as "Call Status",
+       street_address as "Street Address",
+       best_address_flag as "Best Address Flag",
+       city as "City",
+       zipcode as "Zipcode",
+       state as "State",
+       employee_login as "Employee Login",
+	   account_id,
+	   customer_id,
+	   day_id,
+	   product_id,
+	   position_id,
+case when count(*) over (partition by interaction_id) > 1 then interaction_id else 0 end as fact_deduplication_factor
+FROM rpt_apollo.ptab_f_interactions_call_curr f
+WHERE datasource_id in ('OSS_CALL_SAMPLE', 'VEEVA_CALL_SAMPLE', 'OSS_CALL_DETAIL', 'VEEVA_CALL_DETAIL')
+
+
+)
+WITH NO SCHEMA BINDING;
+
+
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.v_tab_Activity_Data_Samples_Details TO oasis_cdw_tst_procuser;
+GRANT SELECT ON rpt_apollo.v_tab_Activity_Data_Samples_Details TO group oasis_cdw_tst_readuser_group;
+
+
+-- Check for Compile of VIEW
+SELECT *
+FROM rpt_apollo.v_tab_Activity_Data_Samples_Details
+LIMIT 1;

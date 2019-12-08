@@ -1,0 +1,19 @@
+CREATE OR REPLACE VIEW rpt_apollo.v_tab_Account_with_Affiliated_Attributes AS
+(SELECT DISTINCT
+"Highest Affiliation Level",
+acc.aff_customer_id as customer_id
+FROM  rpt_apollo.ptab_d_account_full acc
+WHERE aff_customer_id is not null
+)
+WITH NO SCHEMA BINDING;
+
+-- Granting read only access to read group and full control to ETL user
+
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.v_tab_Account_with_Affiliated_Attributes TO oasis_cdw_tst_procuser;
+GRANT SELECT ON rpt_apollo.v_tab_Account_with_Affiliated_Attributes TO group oasis_cdw_tst_readuser_group;
+
+-- Check for Compile of VIEW
+SELECT *
+FROM rpt_apollo.v_tab_Account_with_Affiliated_Attributes
+LIMIT 1;
+

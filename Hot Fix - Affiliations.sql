@@ -1,0 +1,139 @@
+CREATE OR REPLACE VIEW rpt_apollo.v_tab_Account_with_Affiliated_IDN_Attributes AS
+(SELECT 
+account_id,
+acc_hcos_id as "IDN hcos Id",
+acc_source_unique_id as "IDN CDM Id",
+acc_subtype_code as "IDN CDM Subtype",
+acc_type_code as "IDN CDM Type",
+ahi_top_lvl_accnt_id as "IDN Id",
+ahi_top_lvl_accnt_name as IDN,
+aff_customer_id as customer_id,
+affiliation_deduplication_id
+FROM  rpt_apollo.ptab_d_account_full acc
+where aff_level in ('CORP PARENT','UNAFFILIATED CORP PARENT')
+union all
+SELECT
+account_id,
+'-1' as "IDN hcos Id",
+'-1' as "IDN CDM Id",
+'UNASSIGNED' as "IDN CDM Subtype",
+'UNASSIGNED' as "IDN CDM Type",
+ahi_top_lvl_accnt_id  as "IDN Id",
+ahi_top_lvl_accnt_name as IDN,
+acc.aff_customer_id as customer_id,
+1
+FROM  rpt_apollo.ptab_d_account_full acc
+where aff_level in ('FACILITY')  and ahi_lvl8anc_accnt_name = 'UNASSIGNED' AND ahi_top_lvl_accnt_name = 'UNASSIGNED' 
+GROUP BY 1,2,3,4,5,6,7,8,9
+UNION ALL
+SELECT 
+-1,
+'-1' as "Division hcos Id",
+'-1' as "Division CDM Id",
+'UNASSIGNED' as "Division CDM Subtype",
+'UNASSIGNED' as "Division CDM Type",
+ahi_top_lvl_accnt_id as "IDN Id",
+'ORG_UNASSIGNED_SUBDIVISION' as IDN,
+acc.aff_customer_id as customer_id,
+1
+FROM  rpt_apollo.ptab_d_account_full acc
+where aff_level in ('SUB DIVISION','UNAFFILIATED SUB DIVISION') AND ahi_lvl8anc_accnt_name = 'ORG_UNASSIGNED' AND aff_customer_id not in
+(Select aff_customer_id
+FROM  rpt_apollo.ptab_d_account_full acc
+where aff_level in ('CORP PARENT','UNAFFILIATED CORP PARENT') AND ahi_lvl8anc_accnt_name = 'ORG_UNASSIGNED')
+GROUP BY 1,2,3,4,5,6,7,8,9
+union all
+SELECT 
+-1,
+'-1' as "Division hcos Id",
+'-1' as "Division CDM Id",
+'UNASSIGNED' as "Division CDM Subtype",
+'UNASSIGNED' as "Division CDM Type",
+ahi_top_lvl_accnt_id as "IDN Id",
+'ORG_UNASSIGNED_FACILITY' as IDN,
+acc.aff_customer_id as customer_id,
+1
+FROM  rpt_apollo.ptab_d_account_full acc
+where aff_level in ('FACILITY','UNAFFILIATED FACILITY') AND ahi_lvl8anc_accnt_name = 'ORG_UNASSIGNED' AND aff_customer_id not in
+(Select aff_customer_id
+FROM  rpt_apollo.ptab_d_account_full acc
+where aff_level in ('SUB DIVISION','UNAFFILIATED SUB DIVISION','CORP PARENT','UNAFFILIATED CORP PARENT') AND ahi_lvl8anc_accnt_name = 'ORG_UNASSIGNED')
+GROUP BY 1,2,3,4,5,6,7,8,9
+)
+WITH NO SCHEMA BINDING;
+
+-- Granting read only access to read group and full control to ETL user
+
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.v_tab_Account_with_Affiliated_IDN_Attributes TO oasis_cdw_tst_procuser;
+GRANT SELECT ON rpt_apollo.v_tab_Account_with_Affiliated_IDN_Attributes TO group oasis_cdw_tst_readuser_group;
+
+-- Check for Compile of VIEW
+SELECT *
+FROM rpt_apollo.v_tab_Account_with_Affiliated_IDN_Attributes
+LIMIT 1;
+
+
+CREATE OR REPLACE VIEW rpt_apollo.v_tab_Account_with_Affiliated_Subdivision_Attributes AS
+(SELECT 
+account_id,
+acc_hcos_id as "Division hcos Id",
+acc_source_unique_id as "Division CDM Id",
+acc_subtype_code as "Division CDM Subtype",
+acc_type_code as "Division CDM Type",
+ahi_lvl8anc_accnt_id as "Division Id",
+ahi_lvl8anc_accnt_name as Division,
+ahi_top_lvl_accnt_id as "IDN Id",
+ahi_top_lvl_accnt_name as IDN,
+acc.aff_customer_id as customer_id,
+1
+FROM  rpt_apollo.ptab_d_account_full acc
+where aff_level in ('SUB DIVISION','UNAFFILIATED SUB DIVISION')
+UNION all
+Select
+-1,
+'-1' as "Division hcos Id",
+'-1' as "Division CDM Id",
+'UNASSIGNED' as "Division CDM Subtype",
+'UNASSIGNED' as "Division CDM Type",
+ahi_top_lvl_accnt_id as "Division Id",
+'UNASSIGNED' as Division,
+ahi_top_lvl_accnt_id as "IDN Id",
+ahi_top_lvl_accnt_name as IDN,
+acc.aff_customer_id as customer_id,
+1
+FROM  rpt_apollo.ptab_d_account_full acc
+where aff_level in ('FACILITY')  and ahi_lvl8anc_accnt_name = 'UNASSIGNED'
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11
+UNION ALL
+SELECT 
+-1,
+'-1' as "Division hcos Id",
+'-1' as "Division CDM Id",
+'UNASSIGNED'as "Division CDM Subtype",
+'UNASSIGNED' as "Division CDM Type",
+ahi_lvl8anc_accnt_id as "Division Id",
+'ORG_UNASSIGNED_FACILITY' as Division,
+ahi_top_lvl_accnt_id as "IDN Id",
+'ORG_UNASSIGNED_FACILITY' as IDN,
+acc.aff_customer_id as customer_id,
+1
+FROM  rpt_apollo.ptab_d_account_full acc
+where aff_level in ('FACILITY','UNAFFILIATED FACILITY') AND ahi_lvl8anc_accnt_name = 'ORG_UNASSIGNED' AND aff_customer_id not in
+(Select aff_customer_id
+FROM  rpt_apollo.ptab_d_account_full acc
+where aff_level in ('SUB DIVISION','UNAFFILIATED SUB DIVISION') AND ahi_lvl8anc_accnt_name = 'ORG_UNASSIGNED')
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11)
+
+
+WITH NO SCHEMA BINDING;
+
+-- Granting read only access to read group and full control to ETL user
+
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.v_tab_Account_with_Affiliated_Subdivision_Attributes TO oasis_cdw_tst_procuser;
+GRANT SELECT ON rpt_apollo.v_tab_Account_with_Affiliated_Subdivision_Attributes TO group oasis_cdw_tst_readuser_group;
+
+-- Check for Compile of VIEW
+SELECT *
+FROM rpt_apollo.v_tab_Account_with_Affiliated_Subdivision_Attributes
+LIMIT 1;
+

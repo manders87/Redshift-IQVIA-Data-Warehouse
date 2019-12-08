@@ -1,0 +1,37 @@
+DROP VIEW IF EXISTS rpt_apollo.v_tab_Managed_Care_Plan_Attributes;
+
+CREATE VIEW rpt_apollo.v_tab_Managed_Care_Plan_Attributes AS
+(
+SELECT plan_id,
+	pln_account as account,
+	pln_account_sub_group as "Account Sub Group",
+	pln_account_type as "Account Type",
+	pln_bk_of_biz as "Book of Bus",
+	pln_bk_of_biz_sub as "Book of Bus Sg",
+	pln_cont_ind as "Customer Type",
+	pln_director as  director  ,
+	pln_exec_director as "Exec Director"   ,
+	pln_model_type as  "IMS Model Type"  ,
+	pln_nmc_category_code as  "NNI Channel" ,
+	pln_payer_name as  "Payer Channel"  ,
+	plh_nmc_level_0_id as  "Payer Plan Id"  ,
+	plh_nmc_level_0_name as  "Payer Plan Name" ,
+	plh_nmc_level_1_id as   "Payer Channel Id",
+	plh_nmc_level_1_name as   "Payer Channel Name" ,
+	plh_nmc_level_2_id as   "Controlling PBM Id",
+	plh_nmc_level_2_name as   "Controlling PBM Name"
+FROM rpt_apollo.ptab_d_plan_full
+--Matching plan_id count and not duplicating
+WHERE pln_row_number < 2
+)
+WITH NO SCHEMA BINDING;
+
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.v_tab_Managed_Care_Plan_Attributes TO oasis_cdw_tst_procuser;
+GRANT SELECT ON rpt_apollo.v_tab_Managed_Care_Plan_Attributes TO group oasis_cdw_tst_readuser_group;
+
+
+-- Check for Compile of VIEW
+SELECT *
+FROM rpt_apollo.v_tab_Managed_Care_Plan_Attributes
+LIMIT 1;
+

@@ -1,0 +1,2761 @@
+Schema type to be copied:  rpt
+********* QUERY **********
+SELECT sql_file_name FROM rpt_apollo.apollo_control_table where include_in_load = 'Y' ORDER BY load_sequence ASC
+**************************
+
+ ptab_d_Account_Full.sql
+ ptab_d_Customer_Full.sql
+ ptab_d_Day_Full.sql
+ ptab_d_Plan_Full.sql
+ ptab_d_Position_Full.sql
+ ptab_d_Product_Full.sql
+ ptab_F_Interaction_Call.sql
+ ptab_Sales_Nbrx_Terr.sql
+ ptab_Sales_Xptrx_Terr.sql
+
+The following tables will be loaded: 
+ptab_d_Account_Full.sql 
+
+ptab_d_Customer_Full.sql 
+
+ptab_d_Day_Full.sql 
+
+ptab_d_Plan_Full.sql 
+
+ptab_d_Position_Full.sql 
+
+ptab_d_Product_Full.sql 
+
+ptab_F_Interaction_Call.sql 
+
+ptab_Sales_Nbrx_Terr.sql 
+
+ptab_Sales_Xptrx_Terr.sql 
+
+********* QUERY **********
+SELECT value FROM rpt_dims.d_lov where type = 'BATCH_ID_ICM'
+**************************
+
+ 66
+
+Batch ID for current ETL load is 66
+--------------------------------------------------------
+Table ptab_d_Account_Full.sql load to rpt_apollo schema started at Sat May 18 18:37:58 EDT 2019
+********* QUERY **********
+CREATE TABLE IF NOT EXISTS rpt_apollo.ptab_d_account_full_new 
+(
+   account_id                 bigint ENCODE ZSTD  NOT NULL ,
+   acc_source_unique_id           varchar(30)  ENCODE ZSTD,
+   acc_name                       varchar(200)  ENCODE ZSTD,
+   acc_abbr_name                  varchar(100)  ENCODE ZSTD,
+   acc_supertype_code             varchar(50)  ENCODE ZSTD,
+   acc_supertype_name             varchar(100)  ENCODE ZSTD,
+   acc_type_code                  varchar(50)  ENCODE ZSTD,
+   acc_type_name                  varchar(100)  ENCODE ZSTD,
+   acc_subtype_code               varchar(50)  ENCODE ZSTD,
+   acc_subtype_name               varchar(100)  ENCODE ZSTD,
+   acc_status                     varchar(100)  ENCODE ZSTD,
+   acc_accnt_address1             varchar(255)  ENCODE ZSTD,
+   acc_accnt_address2             varchar(255)  ENCODE ZSTD,
+   acc_accnt_city                 varchar(255)  ENCODE ZSTD,
+   acc_accnt_state                varchar(255)  ENCODE ZSTD,
+   acc_accnt_zip                  varchar(10)  ENCODE ZSTD,
+   acc_effective_start_date       date  ENCODE ZSTD,
+   acc_end_date                   date  ENCODE ZSTD,
+   acc_class_of_trade_code        varchar(50)  ENCODE ZSTD,
+   acc_class_of_trade_name        varchar(100)  ENCODE ZSTD,
+   acc_previous_source_unique_id  varchar(20)  ENCODE ZSTD,
+   acc_true_level                 varchar(100)  ENCODE ZSTD,
+   acc_hcos_id                    varchar(20)  ENCODE ZSTD,
+   acc_calculated_true_level      varchar(20)  ENCODE ZSTD,
+   ahi_account_hierarchy_id  bigint  ENCODE ZSTD,
+   ahi_fixed_hier_level      varchar(200)  ENCODE ZSTD,
+   ahi_lvl1anc_accnt_id      varchar(200)  ENCODE ZSTD,
+   ahi_lvl1anc_accnt_name    varchar(200)  ENCODE ZSTD,
+   ahi_lvl2anc_accnt_id      varchar(200)  ENCODE ZSTD,
+   ahi_lvl2anc_accnt_name    varchar(200)  ENCODE ZSTD,
+   ahi_lvl3anc_accnt_id      varchar(200)  ENCODE ZSTD,
+   ahi_lvl3anc_accnt_name    varchar(200)  ENCODE ZSTD,
+   ahi_lvl4anc_accnt_id      varchar(200)  ENCODE ZSTD,
+   ahi_lvl4anc_accnt_name    varchar(200)  ENCODE ZSTD,
+   ahi_lvl5anc_accnt_id      varchar(200)  ENCODE ZSTD,
+   ahi_lvl5anc_accnt_name    varchar(200)  ENCODE ZSTD,
+   ahi_lvl6anc_accnt_id      varchar(200)  ENCODE ZSTD,
+   ahi_lvl6anc_accnt_name    varchar(200)  ENCODE ZSTD,
+   ahi_lvl7anc_accnt_id      varchar(200)  ENCODE ZSTD,
+   ahi_lvl7anc_accnt_name    varchar(200)  ENCODE ZSTD,
+   ahi_lvl8anc_accnt_id      varchar(200)  ENCODE ZSTD,
+   ahi_lvl8anc_accnt_name    varchar(200)  ENCODE ZSTD,
+   ahi_top_lvl_accnt_id      varchar(200)  ENCODE ZSTD,
+   ahi_top_lvl_accnt_name    varchar(200)  ENCODE ZSTD,
+   ahi_active_flag           varchar(10)  ENCODE ZSTD,
+   ahi_true_level            varchar(200)  ,
+   aff_affiliation_rollup_id  bigint ENCODE ZSTD,
+   aff_affil_account_cdm_id   varchar(200) ENCODE ZSTD,
+   aff_affil_customer_cdm_id  varchar(200) ENCODE ZSTD,
+   aff_customer_id             bigint ENCODE ZSTD,
+   aff_level                  varchar(30) ENCODE ZSTD,
+   aff_affil_type             varchar(30) ENCODE ZSTD,
+   aff_idn_affiliation_flag   varchar(1) ENCODE ZSTD,
+   acc_row_number          bigint ENCODE ZSTD,
+   ahi_row_number		  bigint ENCODE ZSTD,
+   aff_row_number         bigint ENCODE ZSTD,
+   affiliation_deduplication_id bigint ENCODE ZSTD,
+   batch_id                       int     ENCODE ZSTD,
+   "Highest Affiliation Level"  varchar(30) ENCODE ZSTD
+   
+)
+DISTSTYLE ALL
+COMPOUND SORTKEY (aff_level, aff_row_number, ahi_top_lvl_accnt_id, ahi_lvl8anc_accnt_id, ahi_lvl7anc_accnt_id  );
+**************************
+
+CREATE TABLE
+********* QUERY **********
+INSERT INTO rpt_apollo.ptab_d_account_full_new
+(
+   account_id                 ,
+   acc_source_unique_id           ,
+   acc_name                       ,
+   acc_abbr_name                  ,
+   acc_supertype_code             ,
+   acc_supertype_name             ,
+   acc_type_code                  ,
+   acc_type_name                  ,
+   acc_subtype_code               ,
+   acc_subtype_name               ,
+   acc_status                     ,
+   acc_accnt_address1             ,
+   acc_accnt_address2             ,
+   acc_accnt_city                 ,
+   acc_accnt_state                ,
+   acc_accnt_zip                  ,
+   acc_effective_start_date       ,
+   acc_end_date                   ,
+   acc_class_of_trade_code        ,
+   acc_class_of_trade_name        ,
+   acc_previous_source_unique_id  ,
+   acc_true_level                 ,
+   acc_hcos_id                    ,
+   acc_calculated_true_level      ,
+   ahi_account_hierarchy_id  ,
+   ahi_fixed_hier_level      ,
+   ahi_lvl1anc_accnt_id      ,
+   ahi_lvl1anc_accnt_name    ,
+   ahi_lvl2anc_accnt_id      ,
+   ahi_lvl2anc_accnt_name    ,
+   ahi_lvl3anc_accnt_id      ,
+   ahi_lvl3anc_accnt_name    ,
+   ahi_lvl4anc_accnt_id      ,
+   ahi_lvl4anc_accnt_name    ,
+   ahi_lvl5anc_accnt_id      ,
+   ahi_lvl5anc_accnt_name    ,
+   ahi_lvl6anc_accnt_id      ,
+   ahi_lvl6anc_accnt_name    ,
+   ahi_lvl7anc_accnt_id      ,
+   ahi_lvl7anc_accnt_name    ,
+   ahi_lvl8anc_accnt_id      ,
+   ahi_lvl8anc_accnt_name    ,
+   ahi_top_lvl_accnt_id      ,
+   ahi_top_lvl_accnt_name    ,
+   ahi_active_flag           ,
+   ahi_true_level            ,
+   aff_affiliation_rollup_id  ,
+   aff_affil_account_cdm_id   ,
+   aff_affil_customer_cdm_id  ,
+   aff_customer_id            ,
+   aff_level                  ,
+   aff_affil_type            ,
+   aff_idn_affiliation_flag  ,
+   acc_row_number,
+   ahi_row_number		  ,
+   aff_row_number    ,
+   affiliation_deduplication_id,
+   batch_id,
+   "Highest Affiliation Level"
+)
+(
+
+SELECT
+   account_id                 ,
+   source_unique_id           ,
+   name                       ,
+   abbr_name                  ,
+   supertype_code             ,
+   supertype_name             ,
+   type_code                  ,
+   type_name                  ,
+   subtype_code               ,
+   subtype_name               ,
+   status                     ,
+   accnt_address1             ,
+   accnt_address2             ,
+   accnt_city                 ,
+   accnt_state                ,
+   accnt_zip                  ,
+   effective_start_date       ,
+   end_date                   ,
+   class_of_trade_code        ,
+   class_of_trade_name        ,
+   previous_source_unique_id  ,
+   acc_true_level                 ,
+   hcos_id                    ,
+   calculated_true_level      ,
+   account_hierarchy_id  ,
+   fixed_hier_level      ,
+   lvl1anc_accnt_id      ,
+   lvl1anc_accnt_name    ,
+   lvl2anc_accnt_id      ,
+   lvl2anc_accnt_name    ,
+   lvl3anc_accnt_id      ,
+   lvl3anc_accnt_name    ,
+   lvl4anc_accnt_id      ,
+   lvl4anc_accnt_name    ,
+   lvl5anc_accnt_id      ,
+   lvl5anc_accnt_name    ,
+   lvl6anc_accnt_id      ,
+   lvl6anc_accnt_name    ,
+   lvl7anc_accnt_id      ,
+   lvl7anc_accnt_name    ,
+   lvl8anc_accnt_id      ,
+   lvl8anc_accnt_name    ,
+   top_lvl_accnt_id      ,
+   top_lvl_accnt_name    ,
+   active_flag           ,
+   ahi_true_level            ,
+   affiliation_rollup_id  ,
+   affil_account_cdm_id   ,
+   affil_customer_cdm_id  ,
+   customer_id            ,
+   level                  ,
+   affil_type            ,
+   idn_affiliation_flag  ,
+   row_number () over (partition by account_id ORDER BY account_hierarchy_id, affiliation_rollup_id) as acc_row_number,
+   case when ahi_account_id is null then 0 else row_number () over (partition by account_id, account_hierarchy_id  ORDER BY account_hierarchy_id, affiliation_rollup_id) end as ahi_row_number,
+   case when aff_account_id is null then 0 else row_number () over (PARTITION BY account_id, affiliation_rollup_id ORDER BY account_hierarchy_id, affiliation_rollup_id) end as aff_row_number,
+   case when count(*) over (partition by customer_id) = 1 then 0  else customer_id end,
+   66,
+   CASE 
+   max(
+   case level 
+   WHEN 'CORP PARENT' THEN 4
+   WHEN 'SUB DIVISION' THEN 3
+   WHEN 'FACILITY' THEN 2
+   else 1
+   end) OVER (PARTITION BY customer_id)
+   WHEN 4 then 'CORP PARENT'
+   WHEN 3 THEN 'SUB DIVISION'
+   WHEN 2 THEN 'FACILITY' 
+   else 'UNAFFILIATED'
+   end 
+   
+  
+FROM	  
+	  
+   (
+   SELECT 
+   acc.account_id                 ,
+   ahi.account_id as ahi_account_id,
+   aff.account_id as aff_account_id,
+   acc.source_unique_id           ,
+   acc.name                       ,
+   acc.abbr_name                  ,
+   acc.supertype_code             ,
+   acc.supertype_name             ,
+   acc.type_code                  ,
+   acc.type_name                  ,
+   acc.subtype_code               ,
+   acc.subtype_name               ,
+   acc.status                     ,
+   acc.accnt_address1             ,
+   acc.accnt_address2             ,
+   acc.accnt_city                 ,
+   acc.accnt_state                ,
+   acc.accnt_zip                  ,
+   acc.effective_start_date       ,
+   acc.end_date                   ,
+   acc.class_of_trade_code        ,
+   acc.class_of_trade_name        ,
+   acc.previous_source_unique_id  ,
+   acc.true_level  as acc_true_level               ,
+   acc.hcos_id                    ,
+   acc.calculated_true_level      ,
+   ahi.account_hierarchy_id  ,
+   ahi.fixed_hier_level      ,
+   ahi.lvl1anc_accnt_id      ,
+   ahi.lvl1anc_accnt_name    ,
+   ahi.lvl2anc_accnt_id      ,
+   ahi.lvl2anc_accnt_name    ,
+   ahi.lvl3anc_accnt_id      ,
+   ahi.lvl3anc_accnt_name    ,
+   ahi.lvl4anc_accnt_id      ,
+   ahi.lvl4anc_accnt_name    ,
+   ahi.lvl5anc_accnt_id      ,
+   ahi.lvl5anc_accnt_name    ,
+   ahi.lvl6anc_accnt_id      ,
+   ahi.lvl6anc_accnt_name    ,
+   ahi.lvl7anc_accnt_id      ,
+   ahi.lvl7anc_accnt_name    ,
+   ahi.lvl8anc_accnt_id      ,
+   ahi.lvl8anc_accnt_name    ,
+   ahi.top_lvl_accnt_id      ,
+   ahi.top_lvl_accnt_name    ,
+   ahi.active_flag           ,
+   ahi.true_level       as ahi_true_level     ,
+   aff.affiliation_rollup_id  ,
+   aff.affil_account_cdm_id   ,
+   aff.affil_customer_cdm_id  ,
+   aff.customer_id            ,
+   aff.level                  ,
+   aff.affil_type            ,
+   aff.idn_affiliation_flag  
+FROM
+rpt_dims.d_account acc
+LEFT JOIN
+rpt_dims.d_account_hierarchy ahi
+ON acc.account_id=ahi.account_id
+LEFT JOIN
+rpt_dims.d_affiliation_rollup aff
+on acc.account_id = aff.account_id
+))
+;
+**************************
+
+INSERT 0 6367411
+********* QUERY **********
+VACUUM FULL rpt_apollo.ptab_d_account_full_new TO 99 PERCENT;
+**************************
+
+VACUUM
+********* QUERY **********
+ANALYZE rpt_apollo.ptab_d_account_full_new;
+**************************
+
+ANALYZE
+********* QUERY **********
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.ptab_d_account_full_new TO oasis_cdw_tst_procuser;
+**************************
+
+GRANT
+********* QUERY **********
+GRANT SELECT ON rpt_apollo.ptab_d_account_full_new TO oasis_cdw_tst_tbl_read_user;
+**************************
+
+GRANT
+********* QUERY **********
+GRANT SELECT ON rpt_apollo.ptab_d_account_full_new TO group oasis_cdw_tst_readuser_group;
+**************************
+
+GRANT
+********* QUERY **********
+DROP TABLE IF EXISTS rpt_apollo.ptab_d_account_full_old;
+**************************
+
+DROP TABLE
+********* QUERY **********
+ALTER TABLE rpt_apollo.ptab_d_account_full RENAME TO ptab_d_account_full_old;
+**************************
+
+ALTER TABLE
+********* QUERY **********
+ALTER TABLE rpt_apollo.ptab_d_account_full_new RENAME TO ptab_d_account_full;
+**************************
+
+ALTER TABLE
+********* QUERY **********
+UPDATE rpt_apollo.apollo_control_table
+set batch_id = 66, last_loaded_date = getdate() ,total_records_loaded =  (SELECT count(*) from rpt_apollo.ptab_d_account_full)
+WHERE sql_file_name = 'ptab_d_Account_Full.sql';
+**************************
+
+UPDATE 1
+********* QUERY **********
+INSERT INTO rpt_apollo.h_apollo_control_table
+(  h_apollo_control_table_id   ,
+   sql_file_name     ,
+   load_sequence           ,
+   include_in_load          ,  
+   last_loaded_date          ,
+   total_records_loaded  ,
+   batch_id
+)
+(select
+   apollo_control_table_id   ,
+   sql_file_name     ,
+   load_sequence           ,
+   include_in_load          ,  
+   last_loaded_date          ,
+   total_records_loaded  ,
+   batch_id
+from rpt_apollo.apollo_control_table
+WHERE sql_file_name =  'ptab_d_Account_Full.sql'
+);
+**************************
+
+INSERT 0 1
+CREATE TABLE INSERT 0 6367411 VACUUM ANALYZE GRANT GRANT GRANT DROP TABLE ALTER TABLE ALTER TABLE UPDATE 1 INSERT 0 1
+Table ptab_d_Account_Full.sql load to rpt_apollo schema ended at Sat May 18 18:41:03 EDT 2019
+--------------------------------------------------------
+--------------------------------------------------------
+Table ptab_d_Customer_Full.sql load to rpt_apollo schema started at Sat May 18 18:41:04 EDT 2019
+********* QUERY **********
+CREATE TABLE IF NOT EXISTS rpt_apollo.ptab_d_customer_full_new
+(
+   customer_id                    		  bigint NOT NULL,
+   cus_source_unique_id                   varchar(30)  ENCODE ZSTD,
+   cus_effective_start_date               date  ENCODE ZSTD,
+   cus_end_date                           date  ENCODE ZSTD,
+   cus_status                             varchar(50)  ENCODE ZSTD,
+   cus_first_name                         varchar(100)  ENCODE ZSTD,
+   cus_middle_name                        varchar(100)  ENCODE ZSTD,
+   cus_last_name                          varchar(100)  ENCODE ZSTD,
+   cus_full_name                          varchar(100)  ENCODE ZSTD,
+   cus_supertype                          varchar(100)  ENCODE ZSTD,
+   cus_type                               varchar(50)  ENCODE ZSTD,
+   cus_subtype                            varchar(100)  ENCODE ZSTD,
+   cus_npi_id                             varchar(50)  ENCODE ZSTD,
+   cus_ims_id                             varchar(19)  ENCODE ZSTD,
+   cus_hce_id                             varchar(50)  ENCODE ZSTD,
+   cus_pr_spec_name                       varchar(100)  ENCODE ZSTD,
+   cus_designation                        varchar(100)  ENCODE ZSTD,
+   cus_deceased_date                      timestamp  ENCODE ZSTD,
+   cus_job_title                          varchar(100)  ENCODE ZSTD,
+   cus_gender                             varchar(50)  ENCODE ZSTD,
+   cus_company_target_flag                char(1)  ENCODE ZSTD,
+   cus_best_addr_street                   varchar(200)  ENCODE ZSTD,
+   cus_best_addr_city                     varchar(50)  ENCODE ZSTD,
+   cus_best_addr_state                    varchar(50)  ENCODE ZSTD,
+   cus_best_addr_zipcode                  varchar(30)  ENCODE ZSTD,
+   cus_kol_flg                            char(1)  ENCODE ZSTD,
+   cus_dea_number                         varchar(20)  ENCODE ZSTD,
+   cus_me_number                          varchar(20)  ENCODE ZSTD,
+   cus_ama_number                         varchar(20)  ENCODE ZSTD,
+   cus_aoa_number                         varchar(20)  ENCODE ZSTD,
+   cus_assmca_number                      varchar(20)  ENCODE ZSTD,
+   cus_no_contact_indicator               char(1)  ENCODE ZSTD,
+   cus_restricted_rx_data_ind             char(1)  ENCODE ZSTD,
+   cus_restricted_rx_data_effective_date  date  ENCODE ZSTD,
+   cus_current_source_unique_id           varchar(20)  ENCODE ZSTD,
+   cus_designation_code                   varchar(50)  ENCODE ZSTD,
+   cus_designation_name                   varchar(100)  ENCODE ZSTD,
+   cus_degree_code                        varchar(50)  ENCODE ZSTD,
+   cus_degree_name                        varchar(100)  ENCODE ZSTD,
+   cus_pr_spec_code                       varchar(255)  ENCODE ZSTD,
+   cus_pr_spec_group                      varchar(255)  ENCODE ZSTD,
+   cus_professional_type                  varchar(255)  ENCODE ZSTD,
+     diabetes_target_flag               varchar(1)    ENCODE ZSTD ,
+   aom_target_flag               varchar(1)   ENCODE ZSTD  ,
+   cad_cust_addr_id                      bigint ENCODE ZSTD,
+   cad_address_id                        bigint ENCODE ZSTD,
+   cad_primary_addr                      varchar(100) ENCODE ZSTD,
+   cad_secondary_addr                    varchar(100) ENCODE ZSTD,
+   cad_city                              varchar(50) ENCODE ZSTD,
+   cad_state                             varchar(50) ENCODE ZSTD,
+   cad_country                           varchar(50) ENCODE ZSTD,
+   cad_zip                               varchar(10) ENCODE ZSTD,
+   cad_addr_type_code                    varchar(50) ENCODE ZSTD,
+   cad_addr_type_name                    varchar(100) ENCODE ZSTD,
+   cad_addr_status_code                  varchar(50) ENCODE ZSTD,
+   cad_addr_status_name                  varchar(100) ENCODE ZSTD,
+   cad_addr_effective_start_date         date ENCODE ZSTD,
+   cad_addr_end_date                     date ENCODE ZSTD,
+   cad_best_addr_indicator               char(1) ENCODE ZSTD,
+   cad_preferred_mailing_addr_indicator  char(1) ENCODE ZSTD,
+   cad_addr_rank_number                  integer ENCODE ZSTD,
+   cad_altrnt_addr_rank_number           integer ENCODE ZSTD,
+   cm_position_id             bigint     ENCODE ZSTD,
+   cm_masking_flag            varchar(1) ENCODE ZSTD,
+   cus_row_number                   bigint ENCODE ZSTD,
+   cm_row_number             bigint ENCODE ZSTD,
+   batch_id                       int     ENCODE ZSTD,
+   cad_row_number				  bigint ENCODE ZSTD
+)
+DISTSTYLE ALL
+COMPOUND SORTKEY (customer_id)
+;
+**************************
+
+CREATE TABLE
+********* QUERY **********
+INSERT INTO rpt_apollo.ptab_d_customer_full_new
+(
+   customer_id                    		  ,
+   cus_source_unique_id                     ,
+   cus_effective_start_date                 ,
+   cus_end_date                             ,
+   cus_status                               ,
+   cus_first_name                           ,
+   cus_middle_name                          ,
+   cus_last_name                            ,
+   cus_full_name                            ,
+   cus_supertype                            ,
+   cus_type                                 ,
+   cus_subtype                              ,
+   cus_npi_id                               ,
+   cus_ims_id                               ,
+   cus_hce_id                               ,
+   cus_pr_spec_name                         ,
+   cus_designation                          ,
+   cus_deceased_date                        ,
+   cus_job_title                            ,
+   cus_gender                               ,
+   cus_company_target_flag                  ,
+   cus_best_addr_street                     ,
+   cus_best_addr_city                       ,
+   cus_best_addr_state                      ,
+   cus_best_addr_zipcode                    ,
+   cus_kol_flg                              ,
+   cus_dea_number                           ,
+   cus_me_number                            ,
+   cus_ama_number                           ,
+   cus_aoa_number                           ,
+   cus_assmca_number                        ,
+   cus_no_contact_indicator                 ,
+   cus_restricted_rx_data_ind               ,
+   cus_restricted_rx_data_effective_date    ,
+   cus_current_source_unique_id             ,
+   cus_designation_code                     ,
+   cus_designation_name                     ,
+   cus_degree_code                          ,
+   cus_degree_name                          ,
+   cus_pr_spec_code                         ,
+   cus_pr_spec_group                        ,
+   cus_professional_type         ,  
+   diabetes_target_flag,
+   aom_target_flag,
+   cm_position_id,
+   cm_masking_flag,
+   cad_cust_addr_id,
+   cad_address_id,
+   cad_primary_addr,
+   cad_secondary_addr,
+   cad_city,
+   cad_state,
+   cad_country,
+   cad_zip,
+   cad_addr_type_code,
+   cad_addr_type_name,
+   cad_addr_status_code,
+   cad_addr_status_name,
+   cad_addr_effective_start_date,
+   cad_addr_end_date,
+   cad_best_addr_indicator,
+   cad_preferred_mailing_addr_indicator,
+   cad_addr_rank_number,
+   cad_altrnt_addr_rank_number,
+   cus_row_number,
+   cm_row_number                ,
+   batch_id,
+   cad_row_number   
+)
+(
+SELECT 
+   cus.customer_id                    		  ,
+   cus.source_unique_id                   ,
+   cus.effective_start_date               ,
+   cus.end_date                           ,
+   cus.status                             ,
+   cus.first_name                         ,
+   cus.middle_name                        ,
+   cus.last_name                          ,
+   cus.full_name                          ,
+   cus.supertype                          ,
+   cus.type                               ,
+   cus.subtype                            ,
+   cus.npi_id                             ,
+   cus.ims_id                             ,
+   cus.hce_id                             ,
+   cus.pr_spec_name                       ,
+   cus.designation                        ,
+   cus.deceased_date                      ,
+   cus.job_title                          ,
+   cus.gender                             ,
+   cus.company_target_flag                ,
+   cus.best_addr_street                   ,
+   cus.best_addr_city                     ,
+   cus.best_addr_state                    ,
+   cus.best_addr_zipcode                  ,
+   cus.kol_flg                            ,
+   cus.dea_number                         ,
+   cus.me_number                          ,
+   cus.ama_number                         ,
+   cus.aoa_number                         ,
+   cus.assmca_number                      ,
+   cus.no_contact_indicator               ,
+   cus.restricted_rx_data_ind             ,
+   cus.restricted_rx_data_effective_date  ,
+   cus.current_source_unique_id           ,
+   cus.designation_code                   ,
+   cus.designation_name                   ,
+   cus.degree_code                        ,
+   cus.degree_name                        ,
+   cus.pr_spec_code                       ,
+   cus.pr_spec_group                      ,
+   cus.professional_type             ,  
+   diab_target.target_flag,
+   aom_target.target_flag,   
+   cm.position_id,
+   cm.masking_flag,
+   cad.cust_addr_id,
+   cad.address_id,
+   cad.primary_addr,
+   cad.secondary_addr,
+   cad.city,
+   cad.state,
+   cad.country,
+   cad.zip,
+   cad.addr_type_code,
+   cad.addr_type_name,
+   cad.addr_status_code,
+   cad.addr_status_name,
+   cad.addr_effective_start_date,
+   cad.addr_end_date,
+   cad.best_addr_indicator,
+   cad.preferred_mailing_addr_indicator,
+   cad.addr_rank_number,
+   cad.altrnt_addr_rank_number,
+   row_number () over (PARTITION BY cus.customer_id ORDER BY cm.position_id, cad.address_id) as cus_row_number,
+   case when cm.customer_id is null then 0 else row_number () over (PARTITION BY cus.customer_id, cm.position_id ORDER BY cm.position_id, cad.address_id) end as cm_row_number,
+   66,
+   case when cad.customer_id is null then 0 else row_number () over (PARTITION BY cus.customer_id, cad.address_id ORDER BY cm.position_id, cad.address_id) end as cad_row_number
+FROM
+rpt_dims.d_customer cus 
+left join
+rpt_dims.d_customer_masking cm
+on cus.customer_id = cm.customer_id
+left join rpt_dims.d_cust_addr cad
+
+on cus.customer_id = cad.customer_id and cad.addr_status_code = 'Active'
+	 
+  LEFT JOIN (select distinct customer_id,target_flag  from rpt_facts.f_customer_alignment a,
+rpt_dims.d_poa p where  a.poa_id=p.poa_id and P.active_flag='CURRENT'
+and P.type='CURRENT SALES POA-DIAB' AND A.SALES_TEAM IN ('DCS', 'HSDCS', 'EDCS')
+and alignment_level ='TERRITORY' and a.datasource_id in( 'PROF' ,'PROF_NBRX')) diab_target on diab_target.customer_id = cus.customer_id
+LEFT JOIN (select distinct customer_id,target_flag  from rpt_facts.f_customer_alignment a,
+rpt_dims.d_poa p where  a.poa_id=p.poa_id and P.active_flag='CURRENT'
+and P.type='CURRENT SALES POA-AOM' 
+and alignment_level ='TERRITORY' and a.datasource_id in( 'PROF' ,'PROF_NBRX')) aom_target on aom_target.customer_id = cus.customer_id
+)
+;
+**************************
+
+INSERT 0 10362031
+********* QUERY **********
+VACUUM FULL rpt_apollo.ptab_d_customer_full_new TO 99 PERCENT;
+**************************
+
+VACUUM
+********* QUERY **********
+ANALYZE rpt_apollo.ptab_d_customer_full_new;
+**************************
+
+ANALYZE
+********* QUERY **********
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.ptab_d_customer_full_new TO oasis_cdw_tst_procuser;
+**************************
+
+GRANT
+********* QUERY **********
+GRANT SELECT ON rpt_apollo.ptab_d_customer_full_new TO oasis_cdw_tst_tbl_read_user;
+**************************
+
+GRANT
+********* QUERY **********
+GRANT SELECT ON rpt_apollo.ptab_d_customer_full_new TO group oasis_cdw_tst_readuser_group;
+**************************
+
+GRANT
+********* QUERY **********
+DROP TABLE IF EXISTS rpt_apollo.ptab_d_customer_full_old;
+**************************
+
+DROP TABLE
+********* QUERY **********
+ALTER TABLE rpt_apollo.ptab_d_customer_full RENAME TO ptab_d_customer_full_old;
+**************************
+
+ALTER TABLE
+********* QUERY **********
+ALTER TABLE rpt_apollo.ptab_d_customer_full_new RENAME TO ptab_d_customer_full;
+**************************
+
+ALTER TABLE
+********* QUERY **********
+UPDATE rpt_apollo.apollo_control_table
+set batch_id = 66, last_loaded_date = getdate() ,total_records_loaded =  (SELECT count(*) from rpt_apollo.ptab_d_customer_full)
+WHERE sql_file_name = 'ptab_d_Customer_Full.sql';
+**************************
+
+UPDATE 1
+********* QUERY **********
+INSERT INTO rpt_apollo.h_apollo_control_table
+(  h_apollo_control_table_id   ,
+   sql_file_name     ,
+   load_sequence           ,
+   include_in_load          ,  
+   last_loaded_date          ,
+   total_records_loaded  ,
+   batch_id
+)
+(select
+   apollo_control_table_id   ,
+   sql_file_name     ,
+   load_sequence           ,
+   include_in_load          ,  
+   last_loaded_date          ,
+   total_records_loaded  ,
+   batch_id
+from rpt_apollo.apollo_control_table
+WHERE sql_file_name =  'ptab_d_Customer_Full.sql'
+);
+**************************
+
+INSERT 0 1
+CREATE TABLE INSERT 0 10362031 VACUUM ANALYZE GRANT GRANT GRANT DROP TABLE ALTER TABLE ALTER TABLE UPDATE 1 INSERT 0 1
+Table ptab_d_Customer_Full.sql load to rpt_apollo schema ended at Sat May 18 18:45:53 EDT 2019
+--------------------------------------------------------
+--------------------------------------------------------
+Table ptab_d_Day_Full.sql load to rpt_apollo schema started at Sat May 18 18:45:53 EDT 2019
+********* QUERY **********
+CREATE TABLE IF NOT EXISTS rpt_apollo.ptab_d_day_full_new 
+(
+   sw_split_week_id     bigint ENCODE ZSTD,
+   sw_week_num          varchar(6)  ENCODE ZSTD,
+   sw_num_of_days       numeric(1)  ENCODE ZSTD,
+   sw_start_date        date  ENCODE ZSTD,
+   sw_end_date          date  ENCODE ZSTD,
+   sw_week_end_date     date  ENCODE ZSTD,
+   sw_calendar_month    date  ENCODE ZSTD,
+   sw_month_end_date    date  ENCODE ZSTD,
+   sw_year_month        varchar(6)  ENCODE ZSTD,
+    day_id                  integer NOT NULL,
+   d_day_dt                  date  ENCODE ZSTD,
+   d_cal_mnth                numeric(2)  ENCODE ZSTD,
+   d_cal_qtr                 numeric(1)  ENCODE ZSTD,
+   d_cal_week                numeric(2)  ENCODE ZSTD,
+   d_cal_year                numeric(4)  ENCODE ZSTD,
+   d_day_name                varchar(30)  ENCODE ZSTD,
+   d_mnth_name               varchar(30)  ENCODE ZSTD,
+   d_mnth_strt_cal_dt_num    numeric(10)  ENCODE ZSTD,
+   d_mnth_end_cal_dt_num     numeric(10)  ENCODE ZSTD,
+   d_day_of_mnth             numeric(2)  ENCODE ZSTD,
+   d_day_of_week             numeric(1)  ENCODE ZSTD,
+   d_day_of_year             numeric(3)  ENCODE ZSTD,
+   d_cal_dt_year_mnth        varchar(50)  ENCODE ZSTD,
+   d_cal_dt_year_qtr         varchar(50)  ENCODE ZSTD,
+   d_cal_dt_year_week        varchar(50)  ENCODE ZSTD,
+   d_cal_dt_year             varchar(50)  ENCODE ZSTD,
+   d_week_ending_date        date  ENCODE ZSTD,
+   d_day_ago_num             integer  ENCODE ZSTD,
+   d_day_ago_dt              date  ENCODE ZSTD,
+   d_week_ago_num            integer  ENCODE ZSTD,
+   d_week_ago_dt             date  ENCODE ZSTD,
+   d_mnth_ago_num            integer  ENCODE ZSTD,
+   d_mnth_ago_dt             date  ENCODE ZSTD,
+   d_qtr_ago_num             integer  ENCODE ZSTD,
+   d_qtr_ago_dt              date  ENCODE ZSTD,
+   d_year_ago_num            integer  ENCODE ZSTD,
+   d_year_ago_dt             date  ENCODE ZSTD,
+   d_year_ago_strt_num       integer  ENCODE ZSTD,
+   d_year_ago_end_num        integer  ENCODE ZSTD,
+   d_mnth_ago_end_num        integer  ENCODE ZSTD,
+   d_year_curr_strt_num      integer  ENCODE ZSTD,
+   d_holiday_flag            integer  ENCODE ZSTD,
+   d_poa                     varchar(30)  ENCODE ZSTD,
+   d_poa_aom                 varchar(30)  ENCODE ZSTD,
+   d_sales_poa               varchar(30)  ENCODE ZSTD,
+   d_sales_poa_aom           varchar(30)  ENCODE ZSTD,
+   batch_id                       int     ENCODE ZSTD,
+   d_split_week_ending_date  date    ENCODE ZSTD       
+   )
+DISTSTYLE ALL
+COMPOUND SORTKEY (day_id)
+;
+**************************
+
+CREATE TABLE
+********* QUERY **********
+INSERT INTO rpt_apollo.ptab_d_day_full_new
+   (
+   sw_split_week_id     ,
+   sw_week_num          ,
+   sw_num_of_days       ,
+   sw_start_date        ,
+   sw_end_date          ,
+   sw_week_end_date     ,
+   sw_calendar_month    ,
+   sw_month_end_date    ,
+   sw_year_month        ,
+    day_id                  ,
+   d_day_dt                  ,
+   d_cal_mnth                ,
+   d_cal_qtr                 ,
+   d_cal_week                ,
+   d_cal_year                ,
+   d_day_name                ,
+   d_mnth_name               ,
+   d_mnth_strt_cal_dt_num    ,
+   d_mnth_end_cal_dt_num     ,
+   d_day_of_mnth             ,
+   d_day_of_week             ,
+   d_day_of_year             ,
+   d_cal_dt_year_mnth        ,
+   d_cal_dt_year_qtr         ,
+   d_cal_dt_year_week        ,
+   d_cal_dt_year             ,
+   d_week_ending_date        ,
+   d_day_ago_num             ,
+   d_day_ago_dt              ,
+   d_week_ago_num            ,
+   d_week_ago_dt             ,
+   d_mnth_ago_num            ,
+   d_mnth_ago_dt             ,
+   d_qtr_ago_num             ,
+   d_qtr_ago_dt              ,
+   d_year_ago_num            ,
+   d_year_ago_dt             ,
+   d_year_ago_strt_num       ,
+   d_year_ago_end_num        ,
+   d_mnth_ago_end_num        ,
+   d_year_curr_strt_num      ,
+   d_holiday_flag            ,
+   d_poa                     ,
+   d_poa_aom                 ,
+   d_sales_poa               ,
+   d_sales_poa_aom           ,
+   batch_id,
+   d_split_week_ending_date
+   )
+   (
+
+   SELECT
+   sw.split_week_id     ,
+   sw.week_num          ,
+   sw.num_of_days       ,
+   sw.start_date        ,
+   sw.end_date          ,
+   sw.week_end_date     ,
+   sw.calendar_month    ,
+   sw.month_end_date    ,
+   sw.year_month        ,
+    d.day_id                  ,
+   d.day_dt                  ,
+   d.cal_mnth                ,
+   d.cal_qtr                 ,
+   d.cal_week                ,
+   d.cal_year                ,
+   d.day_name                ,
+   d.mnth_name               ,
+   d.mnth_strt_cal_dt_num    ,
+   d.mnth_end_cal_dt_num     ,
+   d.day_of_mnth             ,
+   d.day_of_week             ,
+   d.day_of_year             ,
+   d.cal_dt_year_mnth        ,
+   d.cal_dt_year_qtr         ,
+   d.cal_dt_year_week        ,
+   d.cal_dt_year             ,
+   d.week_ending_date        ,
+   d.day_ago_num             ,
+   d.day_ago_dt              ,
+   d.week_ago_num            ,
+   d.week_ago_dt             ,
+   d.mnth_ago_num            ,
+   d.mnth_ago_dt             ,
+   d.qtr_ago_num             ,
+   d.qtr_ago_dt              ,
+   d.year_ago_num            ,
+   d.year_ago_dt             ,
+   d.year_ago_strt_num       ,
+   d.year_ago_end_num        ,
+   d.mnth_ago_end_num        ,
+   d.year_curr_strt_num      ,
+   d.holiday_flag            ,
+   d.poa                     ,
+   d.poa_aom                 ,
+   d.sales_poa               ,
+   d.sales_poa_aom           ,
+   66,
+   d.split_week_ending_date
+  FROM rpt_dims.d_day d left join rpt_dims.d_split_week sw
+   ON d.week_ending_date=sw.end_date
+   );
+**************************
+
+INSERT 0 9131
+********* QUERY **********
+VACUUM FULL rpt_apollo.ptab_d_day_full_new TO 99 PERCENT;
+**************************
+
+VACUUM
+********* QUERY **********
+ANALYZE rpt_apollo.ptab_d_day_full_new;
+**************************
+
+ANALYZE
+********* QUERY **********
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.ptab_d_day_full_new TO oasis_cdw_tst_procuser;
+**************************
+
+GRANT
+********* QUERY **********
+GRANT SELECT ON rpt_apollo.ptab_d_day_full_new TO oasis_cdw_tst_tbl_read_user;
+**************************
+
+GRANT
+********* QUERY **********
+GRANT SELECT ON rpt_apollo.ptab_d_day_full_new TO group oasis_cdw_tst_readuser_group;
+**************************
+
+GRANT
+********* QUERY **********
+DROP TABLE IF EXISTS rpt_apollo.ptab_d_day_full_old;
+**************************
+
+DROP TABLE
+********* QUERY **********
+ALTER TABLE rpt_apollo.ptab_d_day_full RENAME TO ptab_d_day_full_old;
+**************************
+
+ALTER TABLE
+********* QUERY **********
+ALTER TABLE rpt_apollo.ptab_d_day_full_new RENAME TO ptab_d_day_full;
+**************************
+
+ALTER TABLE
+********* QUERY **********
+UPDATE rpt_apollo.apollo_control_table
+set batch_id = 66, last_loaded_date = getdate() ,total_records_loaded =  (SELECT count(*) from rpt_apollo.ptab_d_day_full)
+WHERE sql_file_name = 'ptab_d_Day_Full.sql';
+**************************
+
+UPDATE 1
+********* QUERY **********
+INSERT INTO rpt_apollo.h_apollo_control_table
+(  h_apollo_control_table_id   ,
+   sql_file_name     ,
+   load_sequence           ,
+   include_in_load          ,  
+   last_loaded_date          ,
+   total_records_loaded  ,
+   batch_id
+)
+(select
+   apollo_control_table_id   ,
+   sql_file_name     ,
+   load_sequence           ,
+   include_in_load          ,  
+   last_loaded_date          ,
+   total_records_loaded  ,
+   batch_id
+from rpt_apollo.apollo_control_table
+WHERE sql_file_name =  'ptab_d_Day_Full.sql'
+);
+**************************
+
+INSERT 0 1
+CREATE TABLE INSERT 0 9131 VACUUM ANALYZE GRANT GRANT GRANT DROP TABLE ALTER TABLE ALTER TABLE UPDATE 1 INSERT 0 1
+Table ptab_d_Day_Full.sql load to rpt_apollo schema ended at Sat May 18 18:46:07 EDT 2019
+--------------------------------------------------------
+--------------------------------------------------------
+Table ptab_d_Plan_Full.sql load to rpt_apollo schema started at Sat May 18 18:46:07 EDT 2019
+********* QUERY **********
+CREATE TABLE IF NOT EXISTS rpt_apollo.ptab_d_plan_full_new
+(
+   plan_id             bigint       ENCODE ZSTD  NOT NULL   ,
+   pln_source_unique_id    varchar(100)  ENCODE ZSTD,
+   pln_ins_plan_id         varchar(100)  ENCODE ZSTD,
+   pln_ins_plan_type       varchar(50)  ENCODE ZSTD,
+   pln_ins_plan_name       varchar(100)  ENCODE ZSTD,
+   pln_payer_id            varchar(30)  ENCODE ZSTD,
+   pln_payer_type          varchar(50)  ENCODE ZSTD,
+   pln_payer_name          varchar(100)  ENCODE ZSTD,
+   pln_pbm_id              varchar(30)  ENCODE ZSTD,
+   pln_pbm_name            varchar(100)  ENCODE ZSTD,
+   pln_status_code         char(1)  ENCODE ZSTD,
+   pln_model_type          varchar(20)  ENCODE ZSTD,
+   pln_nmc_category_code   varchar(50)  ,
+   pln_city                varchar(50)  ENCODE ZSTD,
+   pln_hq_state            char(2)  ENCODE ZSTD,
+   pln_operating_state     char(2)  ENCODE ZSTD,
+   pln_account_name        varchar(100)  ENCODE ZSTD,
+   pln_account_sub_group   varchar(100)  ENCODE ZSTD,
+   pln_cont_ind            varchar(25)  ENCODE ZSTD,
+   pln_bk_of_biz           varchar(100)  ENCODE ZSTD,
+   pln_bk_of_biz_sub       varchar(100)  ENCODE ZSTD,
+   pln_category_code       varchar(50)  ENCODE ZSTD,
+   pln_category_code_name  varchar(50)  ENCODE ZSTD,
+   pln_ims_payer_name      varchar(100)  ENCODE ZSTD,
+   pln_account             varchar(100)  ENCODE ZSTD,
+   pln_account_type        varchar(100)  ENCODE ZSTD,
+   pln_exec_director       varchar(100)  ENCODE ZSTD,
+   pln_director            varchar(100)  ENCODE ZSTD,
+   pln_effective_date      date  ENCODE ZSTD,
+   pln_end_date            date  ENCODE ZSTD,
+   pln_active_flag         varchar(10)  ENCODE ZSTD,
+   plh_plan_hierarchy_id      integer           ENCODE ZSTD,
+   plh_source_unique_id       varchar(30)  ENCODE ZSTD,
+   plh_fixed_hierarchy_level  numeric(10)  ENCODE ZSTD,
+   plh_nmc_level_0_id         varchar(30)  ENCODE ZSTD,
+   plh_nmc_level_0_name       varchar(100)  ENCODE ZSTD,
+   plh_nmc_level_1_id         varchar(30)  ENCODE ZSTD,
+   plh_nmc_level_1_name       varchar(100)  ENCODE ZSTD,
+   plh_nmc_level_2_id         varchar(30)  ENCODE ZSTD,
+   plh_nmc_level_2_name       varchar(100)  ENCODE ZSTD,
+   plh_nmc_level_3_id         varchar(30)  ENCODE ZSTD,
+   plh_nmc_level_3_name       varchar(100)  ENCODE ZSTD,
+   plh_nmc_level_4_id         varchar(30)  ENCODE ZSTD,
+   plh_nmc_level_4_name       varchar(100)  ENCODE ZSTD,
+   plh_payer_type_id          integer  ENCODE ZSTD,
+   plh_controlling_pbm        varchar(100)  ENCODE ZSTD,
+   plh_effective_date         date  ENCODE ZSTD,
+   plh_end_date               date  ENCODE ZSTD,
+   plh_active_flag            varchar(10)  ENCODE ZSTD,
+   plx_plan_exclusion_id  bigint          ENCODE ZSTD,
+   pln_row_number          bigint 		ENCODE ZSTD,
+   plh_row_number		  int ENCODE ZSTD,
+     batch_id                       int     ENCODE ZSTD,
+   plx_row_number         int ENCODE ZSTD
+)
+DISTSTYLE ALL
+COMPOUND SORTKEY (pln_nmc_category_code, plan_id)
+;
+**************************
+
+CREATE TABLE
+********* QUERY **********
+INSERT INTO rpt_apollo.ptab_d_plan_full_new
+(
+ plan_id                      ,
+   pln_source_unique_id    ,
+   pln_ins_plan_id         ,
+   pln_ins_plan_type       ,
+   pln_ins_plan_name       ,
+   pln_payer_id            ,
+   pln_payer_type          ,
+   pln_payer_name          ,
+   pln_pbm_id              ,
+   pln_pbm_name            ,
+   pln_status_code         ,
+   pln_model_type          ,
+   pln_nmc_category_code   ,
+   pln_city                ,
+   pln_hq_state            ,
+   pln_operating_state     ,
+   pln_account_name        ,
+   pln_account_sub_group   ,
+   pln_cont_ind            ,
+   pln_bk_of_biz           ,
+   pln_bk_of_biz_sub       ,
+   pln_category_code       ,
+   pln_category_code_name  ,
+   pln_ims_payer_name      ,
+   pln_account             ,
+   pln_account_type        ,
+   pln_exec_director       ,
+   pln_director            ,
+   pln_effective_date      ,
+   pln_end_date            ,
+   pln_active_flag         ,
+   plh_plan_hierarchy_id   ,
+   plh_source_unique_id       ,
+   plh_fixed_hierarchy_level  ,
+   plh_nmc_level_0_id         ,
+   plh_nmc_level_0_name       ,
+   plh_nmc_level_1_id         ,
+   plh_nmc_level_1_name       ,
+   plh_nmc_level_2_id         ,
+   plh_nmc_level_2_name       ,
+   plh_nmc_level_3_id         ,
+   plh_nmc_level_3_name       ,
+   plh_nmc_level_4_id         ,
+   plh_nmc_level_4_name       ,
+   plh_payer_type_id          ,
+   plh_controlling_pbm        ,
+   plh_effective_date         ,
+   plh_end_date               ,
+   plh_active_flag            ,
+   plx_plan_exclusion_id      ,
+   pln_row_number          ,
+   plh_row_number		  ,
+   batch_id               ,
+   plx_row_number           
+)
+(
+
+SELECT 
+   pln.plan_id             ,
+   pln.source_unique_id    ,
+   pln.ins_plan_id         ,
+   pln.ins_plan_type       ,
+   pln.ins_plan_name       ,
+   pln.payer_id            ,
+   pln.payer_type          ,
+   pln.payer_name          ,
+   pln.pbm_id              ,
+   pln.pbm_name            ,
+   pln.status_code         ,
+   pln.model_type          ,
+   pln.nmc_category_code   ,
+   pln.city                ,
+   pln.hq_state            ,
+   pln.operating_state     ,
+   pln.account_name        ,
+   pln.account_sub_group   ,
+   pln.cont_ind            ,
+   pln.bk_of_biz           ,
+   pln.bk_of_biz_sub       ,
+   pln.category_code       ,
+   pln.category_code_name  ,
+   pln.ims_payer_name      ,
+   pln.account             ,
+   pln.account_type        ,
+   pln.exec_director       ,
+   pln.director            ,
+   pln.effective_date      ,
+   pln.end_date            ,
+   pln.active_flag         ,
+   plh.plan_hierarchy_id   ,
+   plh.source_unique_id       ,
+   plh.fixed_hierarchy_level  ,
+   plh.nmc_level_0_id         ,
+   plh.nmc_level_0_name       ,
+   plh.nmc_level_1_id         ,
+   plh.nmc_level_1_name       ,
+   plh.nmc_level_2_id         ,
+   plh.nmc_level_2_name       ,
+   plh.nmc_level_3_id         ,
+   plh.nmc_level_3_name       ,
+   plh.nmc_level_4_id         ,
+   plh.nmc_level_4_name       ,
+   plh.payer_type_id          ,
+   plh.controlling_pbm        ,
+   plh.effective_date         ,
+   plh.end_date               ,
+   plh.active_flag            ,
+   plx.plan_exclusion_id      ,
+   row_number () over (partition by pln.plan_id order by plh. plan_hierarchy_id, plx.plan_exclusion_id ) as pln_row_number		  ,
+   case when plh.plan_id is null then 0 else row_number () over (partition by pln.plan_id, plh. plan_hierarchy_id order by plh. plan_hierarchy_id, plx.plan_exclusion_id ) end as plh_row_number		  ,
+   66,
+   case when plx.plan_id is null then 0 else row_number () over  (partition by pln.plan_id, plx.plan_exclusion_id order by plh. plan_hierarchy_id, plx.plan_exclusion_id) end as plx_row_number   
+FROM
+rpt_dims.d_plan pln
+LEFT JOIN rpt_dims.d_plan_hierarchy plh
+ON pln.plan_id=plh.plan_id
+LEFT JOIN
+rpt_dims.d_plan_exclusion plx
+ON pln.plan_id=plx.plan_id
+);
+**************************
+
+INSERT 0 54034
+********* QUERY **********
+VACUUM FULL rpt_apollo.ptab_d_plan_full_new TO 99 PERCENT;
+**************************
+
+VACUUM
+********* QUERY **********
+ANALYZE rpt_apollo.ptab_d_plan_full_new;
+**************************
+
+ANALYZE
+********* QUERY **********
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.ptab_d_plan_full_new TO oasis_cdw_tst_procuser;
+**************************
+
+GRANT
+********* QUERY **********
+GRANT SELECT ON rpt_apollo.ptab_d_plan_full_new TO oasis_cdw_tst_tbl_read_user;
+**************************
+
+GRANT
+********* QUERY **********
+GRANT SELECT ON rpt_apollo.ptab_d_plan_full_new TO group oasis_cdw_tst_readuser_group;
+**************************
+
+GRANT
+********* QUERY **********
+DROP TABLE IF EXISTS rpt_apollo.ptab_d_plan_full_old;
+**************************
+
+DROP TABLE
+********* QUERY **********
+ALTER TABLE rpt_apollo.ptab_d_plan_full RENAME TO ptab_d_plan_full_old;
+**************************
+
+ALTER TABLE
+********* QUERY **********
+ALTER TABLE rpt_apollo.ptab_d_plan_full_new RENAME TO ptab_d_plan_full;
+**************************
+
+ALTER TABLE
+********* QUERY **********
+UPDATE rpt_apollo.apollo_control_table
+set batch_id = 66, last_loaded_date = getdate() ,total_records_loaded =  (SELECT count(*) from rpt_apollo.ptab_d_plan_full)
+WHERE sql_file_name = 'ptab_d_Plan_Full.sql';
+**************************
+
+UPDATE 1
+********* QUERY **********
+INSERT INTO rpt_apollo.h_apollo_control_table
+(  h_apollo_control_table_id   ,
+   sql_file_name     ,
+   load_sequence           ,
+   include_in_load          ,  
+   last_loaded_date          ,
+   total_records_loaded  ,
+   batch_id
+)
+(select
+   apollo_control_table_id   ,
+   sql_file_name     ,
+   load_sequence           ,
+   include_in_load          ,  
+   last_loaded_date          ,
+   total_records_loaded  ,
+   batch_id
+from rpt_apollo.apollo_control_table
+WHERE sql_file_name =  'ptab_d_Plan_Full.sql'
+);
+**************************
+
+INSERT 0 1
+CREATE TABLE INSERT 0 54034 VACUUM ANALYZE GRANT GRANT GRANT DROP TABLE ALTER TABLE ALTER TABLE UPDATE 1 INSERT 0 1
+Table ptab_d_Plan_Full.sql load to rpt_apollo schema ended at Sat May 18 18:46:22 EDT 2019
+--------------------------------------------------------
+--------------------------------------------------------
+Table ptab_d_Position_Full.sql load to rpt_apollo schema started at Sat May 18 18:46:22 EDT 2019
+********* QUERY **********
+CREATE TABLE IF NOT EXISTS rpt_apollo.ptab_d_position_full_new
+(
+   position_id           	 integer   ENCODE ZSTD NOT NULL,
+   pos_source_unique_id      varchar(30)  ENCODE ZSTD,
+   pos_name                  varchar(50)  ENCODE ZSTD,
+   pos_type                  varchar(100)  ,
+   pos_parent_name           varchar(50)  ENCODE ZSTD,
+   pos_type_flag             varchar(10)  ENCODE ZSTD,
+   pos_effective_start_date  date  ENCODE ZSTD,
+   pos_end_date              date  ENCODE ZSTD,
+   pos_sales_force           varchar(256)  ENCODE ZSTD,
+   pos_salesforce_value      varchar(256)  ENCODE ZSTD,
+   pos_position_lvl          varchar(255)  ENCODE ZSTD,
+   phi_position_hierarchy_id  bigint  ENCODE ZSTD,
+   phi_source_unique_id       varchar(30)  ENCODE ZSTD,
+   phi_hierarchy_lvl          varchar(255)  ENCODE ZSTD,
+   phi_top_hl_position_id     varchar(50)  ENCODE ZSTD,
+   phi_top_hl_position_name   varchar(50)  ENCODE ZSTD,
+   phi_top_hl_position_type   varchar(50)  ENCODE ZSTD,
+   phi_hl1_position_id        varchar(50)  ENCODE ZSTD,
+   phi_hl1_position_name      varchar(50)  ENCODE ZSTD,
+   phi_hl1_position_type      varchar(50)  ENCODE ZSTD,
+   phi_hl2_position_id        varchar(50)  ENCODE ZSTD,
+   phi_hl2_position_name      varchar(50)  ENCODE ZSTD,
+   phi_hl2_position_type      varchar(50)  ENCODE ZSTD,
+   phi_hl3_position_id        varchar(50)  ENCODE ZSTD,
+   phi_hl3_position_name      varchar(50)  ENCODE ZSTD,
+   phi_hl3_position_type      varchar(50)  ENCODE ZSTD,
+   phi_hl4_position_id        varchar(50)  ENCODE ZSTD,
+   phi_hl4_position_name      varchar(50)  ENCODE ZSTD,
+   phi_hl4_position_type      varchar(50)  ENCODE ZSTD,
+   phi_hl5_position_id        varchar(50)  ENCODE ZSTD,
+   phi_hl5_position_name      varchar(50)  ENCODE ZSTD,
+   phi_hl5_position_type      varchar(50)  ENCODE ZSTD,
+   phi_hl6_position_id        varchar(50)  ENCODE ZSTD,
+   phi_hl6_position_name      varchar(50)  ENCODE ZSTD,
+   phi_hl6_position_type      varchar(50)  ENCODE ZSTD,
+   phi_hl7_position_id        varchar(50)  ENCODE ZSTD,
+   phi_hl7_position_name      varchar(50)  ENCODE ZSTD,
+   phi_hl7_position_type      varchar(50)  ENCODE ZSTD,
+   phi_hl8_position_id        varchar(50)  ENCODE ZSTD,
+   phi_hl8_position_name      varchar(50)  ENCODE ZSTD,
+   phi_hl8_position_type      varchar(50)  ENCODE ZSTD,
+   phi_effective_start_date   timestamp  ENCODE ZSTD,
+   phi_end_date               timestamp  ENCODE ZSTD,
+   phi_poa_name               varchar(50)  ENCODE ZSTD,
+   phi_sales_force            varchar(255)  ENCODE ZSTD,
+   phi_pod_primary            varchar(10)  ENCODE ZSTD,
+   poa_poa_id             	      bigint     ENCODE ZSTD,
+   poa_source_unique_id    varchar(100)  ENCODE ZSTD,
+   poa_type                varchar(100)  ENCODE ZSTD,
+   poa_name                varchar(50)  ENCODE ZSTD,
+   poa_start_date_id       integer  ENCODE ZSTD,
+   poa_end_date_id         integer  ENCODE ZSTD,
+   poa_prev_start_date_id  integer  ENCODE ZSTD,
+   poa_prev_end_date_id    integer  ENCODE ZSTD,
+   poa_num_of_months       integer  ENCODE ZSTD,
+   poa_field_force         varchar(20)  ENCODE ZSTD,
+   poa_active_flag         varchar(10)  ENCODE ZSTD,
+   poa_prev_poa_name       varchar(50)  ENCODE ZSTD,
+   psg_position_segment_id  integer  ENCODE ZSTD,
+   psg_source_unique_id     varchar(100)  ENCODE ZSTD,
+   psg_archetype_flag       varchar(50)  ENCODE ZSTD,
+   eps_empl_pstn_id          bigint  ENCODE ZSTD,
+   eps_source_unique_id      varchar(30)  ENCODE ZSTD,
+   eps_effective_start_date  timestamp  ENCODE ZSTD,
+   eps_end_date              timestamp  ENCODE ZSTD,
+   eps_active_flg            char(1)  ENCODE ZSTD,
+   emp_employee_id       bigint  ENCODE ZSTD,
+   emp_source_unique_id  varchar(30)  ENCODE ZSTD,
+   emp_emp_num           varchar(20)  ENCODE ZSTD,
+   emp_emp_initials      varchar(5)  ENCODE ZSTD,
+   emp_first_name        varchar(50)  ENCODE ZSTD,
+   emp_middle_name       varchar(50)  ENCODE ZSTD,
+   emp_last_name         varchar(50)  ENCODE ZSTD,
+   emp_full_name         varchar(100)  ENCODE ZSTD,
+   emp_addr_street       varchar(200)  ENCODE ZSTD,
+   emp_addr_city         varchar(50)  ENCODE ZSTD,
+   emp_addr_state        varchar(2)  ENCODE ZSTD,
+   emp_addr_zip          varchar(10)  ENCODE ZSTD,
+   emp_email             varchar(100)  ENCODE ZSTD,
+   emp_title             varchar(100)  ENCODE ZSTD,
+   emp_hire_date         date  ENCODE ZSTD,
+   emp_termination_date  date  ENCODE ZSTD,
+   emp_work_phone        varchar(15)  ENCODE ZSTD,
+   emp_work_phone_ext    varchar(5)  ENCODE ZSTD,
+   emp_active_status     varchar(30)   ENCODE ZSTD,
+   pos_row_number	     bigint  ENCODE ZSTD,
+    psg_row_number		 int ENCODE ZSTD,
+   phi_row_number        int ENCODE ZSTD, 
+   poa_row_number        int ENCODE ZSTD,
+   eps_row_number        int ENCODE ZSTD,
+   batch_id                       int     ENCODE ZSTD,
+   emp_row_number        int ENCODE ZSTD
+)
+DISTSTYLE ALL
+COMPOUND SORTKEY 
+(   pos_type ,
+eps_row_number,
+	 poa_active_flag
+    )
+;
+**************************
+
+CREATE TABLE
+********* QUERY **********
+INSERT INTO rpt_apollo.ptab_d_position_full_new
+(
+   position_id           	 ,
+   pos_source_unique_id      ,
+   pos_name                  ,
+   pos_type                  ,
+   pos_parent_name           ,
+   pos_type_flag             ,
+   pos_effective_start_date  ,
+   pos_end_date              ,
+   pos_sales_force           ,
+   pos_salesforce_value      ,
+   pos_position_lvl          ,
+   phi_position_hierarchy_id  ,
+   phi_source_unique_id       ,
+   phi_hierarchy_lvl          ,
+   phi_top_hl_position_id     ,
+   phi_top_hl_position_name   ,
+   phi_top_hl_position_type   ,
+   phi_hl1_position_id        ,
+   phi_hl1_position_name      ,
+   phi_hl1_position_type      ,
+   phi_hl2_position_id        ,
+   phi_hl2_position_name      ,
+   phi_hl2_position_type      ,
+   phi_hl3_position_id        ,
+   phi_hl3_position_name      ,
+   phi_hl3_position_type      ,
+   phi_hl4_position_id        ,
+   phi_hl4_position_name      ,
+   phi_hl4_position_type      ,
+   phi_hl5_position_id        ,
+   phi_hl5_position_name      ,
+   phi_hl5_position_type      ,
+   phi_hl6_position_id        ,
+   phi_hl6_position_name      ,
+   phi_hl6_position_type      ,
+   phi_hl7_position_id        ,
+   phi_hl7_position_name      ,
+   phi_hl7_position_type      ,
+   phi_hl8_position_id        ,
+   phi_hl8_position_name      ,
+   phi_hl8_position_type      ,
+   phi_effective_start_date   ,
+   phi_end_date               ,
+   phi_poa_name               ,
+   phi_sales_force            ,
+   phi_pod_primary            ,
+   poa_poa_id             	            ,
+   poa_source_unique_id    ,
+   poa_type                ,
+   poa_name                ,
+   poa_start_date_id       ,
+   poa_end_date_id         ,
+   poa_prev_start_date_id  ,
+   poa_prev_end_date_id    ,
+   poa_num_of_months       ,
+   poa_field_force         ,
+   poa_active_flag         ,
+   poa_prev_poa_name       ,
+   psg_position_segment_id  ,
+   psg_source_unique_id     ,
+   psg_archetype_flag       ,
+   eps_empl_pstn_id          ,
+   eps_source_unique_id      ,
+   eps_effective_start_date  ,
+   eps_end_date              ,
+   eps_active_flg            ,
+   emp_employee_id       ,
+   emp_source_unique_id  ,
+   emp_emp_num           ,
+   emp_emp_initials      ,
+   emp_first_name        ,
+   emp_middle_name       ,
+   emp_last_name         ,
+   emp_full_name         ,
+   emp_addr_street       ,
+   emp_addr_city         ,
+   emp_addr_state        ,
+   emp_addr_zip          ,
+   emp_email             ,
+   emp_title             ,
+   emp_hire_date         ,
+   emp_termination_date  ,
+   emp_work_phone        ,
+   emp_work_phone_ext    ,
+   emp_active_status     ,
+   pos_row_number	,
+    psg_row_number,
+   phi_row_number, 
+   poa_row_number,
+   eps_row_number,
+   batch_id,
+   emp_row_number
+)
+(
+
+SELECT 
+   pos.position_id           	 ,
+   pos.source_unique_id      ,
+   pos.name                  ,
+   pos.type                  ,
+   pos.parent_name           ,
+   pos.type_flag             ,
+   pos.effective_start_date  ,
+   pos.end_date              ,
+   pos.sales_force           ,
+   pos.salesforce_value      ,
+   pos.position_lvl          ,
+   phi.position_hierarchy_id  ,
+   phi.source_unique_id       ,
+   phi.hierarchy_lvl          ,
+   phi.top_hl_position_id     ,
+   phi.top_hl_position_name   ,
+   phi.top_hl_position_type   ,
+   phi.hl1_position_id        ,
+   phi.hl1_position_name      ,
+   phi.hl1_position_type      ,
+   phi.hl2_position_id        ,
+   phi.hl2_position_name      ,
+   phi.hl2_position_type      ,
+   phi.hl3_position_id        ,
+   phi.hl3_position_name      ,
+   phi.hl3_position_type      ,
+   phi.hl4_position_id        ,
+   phi.hl4_position_name      ,
+   phi.hl4_position_type      ,
+   phi.hl5_position_id        ,
+   phi.hl5_position_name      ,
+   phi.hl5_position_type      ,
+   phi.hl6_position_id        ,
+   phi.hl6_position_name      ,
+   phi.hl6_position_type      ,
+   phi.hl7_position_id        ,
+   phi.hl7_position_name      ,
+   phi.hl7_position_type      ,
+   phi.hl8_position_id        ,
+   phi.hl8_position_name      ,
+   phi.hl8_position_type      ,
+   phi.effective_start_date   ,
+   phi.end_date               ,
+   phi.poa_name               ,
+   phi.sales_force            ,
+   phi.pod_primary            ,
+   poa.poa_id             	            ,
+   poa.source_unique_id    ,
+   poa.type                ,
+   poa.name                ,
+   poa.start_date_id       ,
+   poa.end_date_id         ,
+   poa.prev_start_date_id  ,
+   poa.prev_end_date_id    ,
+   poa.num_of_months       ,
+   poa.field_force         ,
+   poa.active_flag         ,
+   poa.prev_poa_name       ,
+   psg.position_segment_id  ,
+   psg.source_unique_id     ,
+   psg.archetype_flag       ,
+   eps.empl_pstn_id          ,
+   eps.source_unique_id      ,
+   eps.effective_start_date  ,
+   eps.end_date              ,
+   eps.active_flg            ,
+   emp.employee_id       ,
+   emp.source_unique_id  ,
+   emp.emp_num           ,
+   emp.emp_initials      ,
+   emp.first_name        ,
+   emp.middle_name       ,
+   emp.last_name         ,
+   emp.full_name         ,
+   emp.addr_street       ,
+   emp.addr_city         ,
+   emp.addr_state        ,
+   emp.addr_zip          ,
+   emp.email             ,
+   emp.title             ,
+   emp.hire_date         ,
+   emp.termination_date  ,
+   emp.work_phone        ,
+   emp.work_phone_ext    ,
+   emp.active_status     ,
+   row_number () over (partition by pos.position_id order by poa.active_flag asc, poa.poa_id desc nulls last, phi.position_hierarchy_id desc nulls last ,psg.position_segment_id,  eps.employee_id, emp.employee_id) as pos_row_number		  ,
+   case when psg.position_id is null then 0 else row_number () over (partition by pos.position_id , psg.position_segment_id order by poa.active_flag asc, poa.poa_id desc nulls last, phi.position_hierarchy_id desc nulls last ,psg.position_segment_id,  eps.employee_id, emp.employee_id) end as psg_row_number		  ,
+   case when phi.position_id is null then 0 else row_number () over (partition by pos.position_id , phi.position_hierarchy_id order by poa.active_flag asc, poa.poa_id desc nulls last, phi.position_hierarchy_id desc nulls last ,psg.position_segment_id,  eps.employee_id, emp.employee_id) end as phi_row_number	,
+   case when poa.poa_id is null then 0 else row_number () over (partition by pos.position_id, poa.poa_id   order by poa.active_flag asc, poa.poa_id desc nulls last, phi.position_hierarchy_id desc nulls last ,psg.position_segment_id,  eps.employee_id, emp.employee_id ) end as poa_row_number	,
+   case when eps.position_id is null then 0 else row_number () over (partition by pos.position_id , eps. empl_pstn_id order by poa.active_flag asc, poa.poa_id desc nulls last, phi.position_hierarchy_id desc nulls last ,psg.position_segment_id,  eps.employee_id, emp.employee_id) end as eps_row_number	,
+   66,
+   case when emp.employee_id is null then 0 else row_number () over (partition by pos.position_id, emp.employee_id order by poa.active_flag asc, poa.poa_id desc nulls last, phi.position_hierarchy_id desc nulls last ,psg.position_segment_id,  eps.employee_id, emp.employee_id) end as emp_row_number
+    
+FROM
+rpt_dims.d_position pos
+
+LEFT JOIN rpt_dims.d_position_segment psg
+ON pos.position_id = psg.position_id
+LEFT JOIN
+rpt_dims.d_position_hierarchy phi 
+ON phi.position_id = pos.position_id
+left JOIN rpt_dims.d_poa poa 
+on poa.poa_id = phi.poa_id
+LEFT JOIN
+
+rpt_dims.d_empl_pstn eps
+ON pos.position_id = eps.position_id 
+left join rpt_dims.d_employee emp 
+on eps.employee_id = emp.employee_id
+);
+**************************
+
+INSERT 0 85158
+********* QUERY **********
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.ptab_d_position_full_new TO oasis_cdw_tst_procuser;
+**************************
+
+GRANT
+********* QUERY **********
+GRANT SELECT ON rpt_apollo.ptab_d_position_full_new TO oasis_cdw_tst_tbl_read_user;
+**************************
+
+GRANT
+********* QUERY **********
+GRANT SELECT ON rpt_apollo.ptab_d_position_full_new TO group oasis_cdw_tst_readuser_group;
+**************************
+
+GRANT
+********* QUERY **********
+VACUUM FULL rpt_apollo.ptab_d_position_full_new TO 99 PERCENT;
+**************************
+
+VACUUM
+********* QUERY **********
+ANALYZE rpt_apollo.ptab_d_position_full_new;
+**************************
+
+ANALYZE
+********* QUERY **********
+DROP TABLE IF EXISTS rpt_apollo.ptab_d_position_full_old;
+**************************
+
+DROP TABLE
+********* QUERY **********
+ALTER TABLE rpt_apollo.ptab_d_position_full RENAME TO ptab_d_position_full_old;
+**************************
+
+ALTER TABLE
+********* QUERY **********
+ALTER TABLE rpt_apollo.ptab_d_position_full_new RENAME TO ptab_d_position_full;
+**************************
+
+ALTER TABLE
+********* QUERY **********
+UPDATE rpt_apollo.apollo_control_table
+set batch_id = 66, last_loaded_date = getdate() ,total_records_loaded =  (SELECT count(*) from rpt_apollo.ptab_d_position_full)
+WHERE sql_file_name = 'ptab_d_Position_Full.sql';
+**************************
+
+UPDATE 1
+********* QUERY **********
+INSERT INTO rpt_apollo.h_apollo_control_table
+(  h_apollo_control_table_id   ,
+   sql_file_name     ,
+   load_sequence           ,
+   include_in_load          ,  
+   last_loaded_date          ,
+   total_records_loaded  ,
+   batch_id
+)
+(select
+   apollo_control_table_id   ,
+   sql_file_name     ,
+   load_sequence           ,
+   include_in_load          ,  
+   last_loaded_date          ,
+   total_records_loaded  ,
+   batch_id
+from rpt_apollo.apollo_control_table
+WHERE sql_file_name =  'ptab_d_Position_Full.sql'
+);
+**************************
+
+INSERT 0 1
+CREATE TABLE INSERT 0 85158 GRANT GRANT GRANT VACUUM ANALYZE DROP TABLE ALTER TABLE ALTER TABLE UPDATE 1 INSERT 0 1
+Table ptab_d_Position_Full.sql load to rpt_apollo schema ended at Sat May 18 18:46:44 EDT 2019
+--------------------------------------------------------
+--------------------------------------------------------
+Table ptab_d_Product_Full.sql load to rpt_apollo schema started at Sat May 18 18:46:44 EDT 2019
+********* QUERY **********
+CREATE TABLE IF NOT EXISTS rpt_apollo.ptab_d_product_full_new
+(
+   product_id                         bigint         ENCODE ZSTD NOT NULL,
+   prd_product_name                   varchar(100)  ENCODE ZSTD,
+   prd_type_code                      varchar(50)  ENCODE ZSTD,
+   prd_chemical_name                  varchar(255)  ENCODE ZSTD,
+   prd_strength                       varchar(255)  ENCODE ZSTD,
+   prd_form_code                      varchar(16)  ENCODE ZSTD,
+   prd_form_description               varchar(100)  ENCODE ZSTD,
+   prd_units_per_case                 varchar(16)  ENCODE ZSTD,
+   prd_manufacturer_name              varchar(255)  ENCODE ZSTD,
+   prd_distributor_name               varchar(255)  ENCODE ZSTD,
+   prd_volume                         varchar(48)  ENCODE ZSTD,
+   prd_equivalent_unit                varchar(40)  ENCODE ZSTD,
+   prd_chemical_entity_code           varchar(16)  ENCODE ZSTD,
+   prd_chemical_entiry_description    varchar(100)  ENCODE ZSTD,
+   prd_device_code                    varchar(16)  ENCODE ZSTD,
+   prd_device_code_description        varchar(255)  ENCODE ZSTD,
+   prd_therapy_code                   varchar(16)  ENCODE ZSTD,
+   prd_therapy_code_description       varchar(18)  ENCODE ZSTD,
+   prd_generic_indicator              varchar(10)  ENCODE ZSTD,
+   prd_unit_description               varchar(255)  ENCODE ZSTD,
+   prd_launch_date                    date  ENCODE ZSTD,
+   prd_effective_date                 date  ENCODE ZSTD,
+   prd_end_date                       date  ENCODE ZSTD,
+   prd_status                         varchar(10)  ENCODE ZSTD,
+   prd_molecule_name                  varchar(255)  ENCODE ZSTD,
+   prd_product_form_code              varchar(256)  ENCODE ZSTD,
+   prd_product_form_code_description  varchar(256)  ENCODE ZSTD,
+   prd_regimen                        varchar(256)  ENCODE ZSTD,
+   prd_product_description            varchar(256)  ENCODE ZSTD,
+   prd_parent_product_id              varchar(20)  ENCODE ZSTD,
+   prh_product_hierarchy_id  bigint      ENCODE ZSTD,
+   prh_source_unique_id      varchar(30)  ENCODE ZSTD,
+   prh_product_id            bigint  ENCODE ZSTD,
+   prh_hierarchy_lvl         integer  ENCODE ZSTD,
+   prh_top_hl_prod_id        varchar(20)  ENCODE ZSTD,
+   prh_top_hl_prod_name      varchar(100) ,
+   prh_hl1_product_id        varchar(20)  ENCODE ZSTD,
+   prh_hl1_product_name      varchar(100)  ENCODE ZSTD,
+   prh_hl2_product_id        varchar(20)  ENCODE ZSTD,
+   prh_hl2_product_name      varchar(100)  ENCODE ZSTD,
+   prh_hl3_product_id        varchar(20)  ENCODE ZSTD,
+   prh_hl3_product_name      varchar(100)  ENCODE ZSTD,
+   prh_hl4_product_id        varchar(20)  ENCODE ZSTD,
+   prh_hl4_product_name      varchar(100)  ENCODE ZSTD,
+   prh_hl5_product_id        varchar(20)  ENCODE ZSTD,
+   prh_hl5_product_name      varchar(100)  ENCODE ZSTD,
+   prh_hl6_product_id        varchar(20)  ENCODE ZSTD,
+   prh_hl6_product_name      varchar(100)  ENCODE ZSTD,
+   prh_hl7_product_id        varchar(20)  ENCODE ZSTD,
+   prh_hl7_product_name      varchar(100) ENCODE ZSTD ,
+   prh_hl8_product_id        varchar(20)  ENCODE ZSTD,
+   prh_hl8_product_name      varchar(100)  ENCODE ZSTD,
+   prh_hl9_product_id        varchar(20)  ENCODE ZSTD,
+   prh_hl9_product_name      varchar(100)  ENCODE ZSTD,
+   prh_h10_product_id        varchar(20)  ENCODE ZSTD,
+   prh_h10_product_name      varchar(100)  ENCODE ZSTD,
+   prh_status                varchar(10)  ENCODE ZSTD,
+   prh_segment               varchar(256)  ENCODE ZSTD,
+   prd_row_number                 bigint   ENCODE ZSTD,
+   batch_id                       int     ENCODE ZSTD,
+   prh_row_number                  bigint   ENCODE ZSTD
+  
+   
+)
+DISTSTYLE ALL
+COMPOUND SORTKEY (prh_top_hl_prod_name, prh_h10_product_name, prh_hl9_product_name, prh_hl8_product_name, prh_hl7_product_name, prh_hl6_product_name  );
+**************************
+
+CREATE TABLE
+********* QUERY **********
+INSERT INTO rpt_apollo.ptab_d_product_full_new
+(
+   product_id                                   ,
+   prd_product_name                   ,
+   prd_type_code                      ,
+   prd_chemical_name                  ,
+   prd_strength                       ,
+   prd_form_code                      ,
+   prd_form_description               ,
+   prd_units_per_case                 ,
+   prd_manufacturer_name              ,
+   prd_distributor_name               ,
+   prd_volume                         ,
+   prd_equivalent_unit                ,
+   prd_chemical_entity_code           ,
+   prd_chemical_entiry_description    ,
+   prd_device_code                    ,
+   prd_device_code_description        ,
+   prd_therapy_code                   ,
+   prd_therapy_code_description       ,
+   prd_generic_indicator              ,
+   prd_unit_description               ,
+   prd_launch_date                    ,
+   prd_effective_date                 ,
+   prd_end_date                       ,
+   prd_status                         ,
+   prd_molecule_name                  ,
+   prd_product_form_code              ,
+   prd_product_form_code_description  ,
+   prd_regimen                        ,
+   prd_product_description            ,
+   prd_parent_product_id              ,
+   prh_product_hierarchy_id      ,
+   prh_source_unique_id      ,
+   prh_hierarchy_lvl         ,
+   prh_top_hl_prod_id        ,
+   prh_top_hl_prod_name      ,
+   prh_hl1_product_id        ,
+   prh_hl1_product_name      ,
+   prh_hl2_product_id        ,
+   prh_hl2_product_name      ,
+   prh_hl3_product_id        ,
+   prh_hl3_product_name      ,
+   prh_hl4_product_id        ,
+   prh_hl4_product_name      ,
+   prh_hl5_product_id        ,
+   prh_hl5_product_name      ,
+   prh_hl6_product_id        ,
+   prh_hl6_product_name      ,
+   prh_hl7_product_id        ,
+   prh_hl7_product_name      ,
+   prh_hl8_product_id        ,
+   prh_hl8_product_name      ,
+   prh_hl9_product_id        ,
+   prh_hl9_product_name      ,
+   prh_h10_product_id        ,
+   prh_h10_product_name      ,
+   prh_status                ,
+   prh_segment               ,
+   prd_row_number             ,
+   batch_id,
+   prh_row_number
+)
+(
+
+SELECT 
+   prd.product_id                         ,
+   prd.product_name                   ,
+   prd.type_code                      ,
+   prd.chemical_name                  ,
+   prd.strength                       ,
+   prd.form_code                      ,
+   prd.form_description               ,
+   prd.units_per_case                 ,
+   prd.manufacturer_name              ,
+   prd.distributor_name               ,
+   prd.volume                         ,
+   prd.equivalent_unit                ,
+   prd.chemical_entity_code           ,
+   prd.chemical_entiry_description    ,
+   prd.device_code                    ,
+   prd.device_code_description        ,
+   prd.therapy_code                   ,
+   prd.therapy_code_description       ,
+   prd.generic_indicator              ,
+   prd.unit_description               ,
+   prd.launch_date                    ,
+   prd.effective_date                 ,
+   prd.end_date                       ,
+   prd.status                         ,
+   prd.molecule_name                  ,
+   prd.product_form_code              ,
+   prd.product_form_code_description  ,
+   prd.regimen                        ,
+   prd.product_description            ,
+   prd.parent_product_id              ,
+   prh.product_hierarchy_id      ,
+   prh.source_unique_id      ,
+   cast(prh.hierarchy_lvl   as integer)      ,
+   prh.top_hl_prod_id        ,
+   prh.top_hl_prod_name      ,
+   prh.hl1_product_id        ,
+   prh.hl1_product_name      ,
+   prh.hl2_product_id        ,
+   prh.hl2_product_name      ,
+   prh.hl3_product_id        ,
+   prh.hl3_product_name      ,
+   prh.hl4_product_id        ,
+   prh.hl4_product_name      ,
+   prh.hl5_product_id        ,
+   prh.hl5_product_name      ,
+   prh.hl6_product_id        ,
+   prh.hl6_product_name      ,
+   prh.hl7_product_id        ,
+   prh.hl7_product_name      ,
+   prh.hl8_product_id        ,
+   prh.hl8_product_name      ,
+   prh.hl9_product_id        ,
+   prh.hl9_product_name      ,
+   prh.h10_product_id        ,
+   prh.h10_product_name      ,
+   prh.status                ,
+   prh.segment               ,
+  row_number () over (partition by  prd.product_id ORDER BY prh.product_hierarchy_id  ) as prd_row_number,
+  66,
+   case when prh.product_id is null then 0 else row_number () over (PARTITION BY prd.product_id, prh.product_hierarchy_id ORDER BY prh.product_hierarchy_id ) end as prh_row_number
+FROM
+rpt_dims.d_product prd
+LEFT JOIN
+rpt_dims.d_product_hierarchy prh
+ON prd.product_id=prh.product_id
+);
+**************************
+
+INSERT 0 1823
+********* QUERY **********
+VACUUM FULL rpt_apollo.ptab_d_product_full_new TO 99 PERCENT;
+**************************
+
+VACUUM
+********* QUERY **********
+ANALYZE rpt_apollo.ptab_d_product_full_new;
+**************************
+
+ANALYZE
+********* QUERY **********
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.ptab_d_product_full_new TO oasis_cdw_tst_procuser;
+**************************
+
+GRANT
+********* QUERY **********
+GRANT SELECT ON rpt_apollo.ptab_d_product_full_new TO oasis_cdw_tst_tbl_read_user;
+**************************
+
+GRANT
+********* QUERY **********
+GRANT SELECT ON rpt_apollo.ptab_d_product_full_new TO group oasis_cdw_tst_readuser_group;
+**************************
+
+GRANT
+********* QUERY **********
+DROP TABLE IF EXISTS rpt_apollo.ptab_d_product_full_old;
+**************************
+
+DROP TABLE
+********* QUERY **********
+ALTER TABLE rpt_apollo.ptab_d_product_full RENAME TO ptab_d_product_full_old;
+**************************
+
+ALTER TABLE
+********* QUERY **********
+ALTER TABLE rpt_apollo.ptab_d_product_full_new RENAME TO ptab_d_product_full;
+**************************
+
+ALTER TABLE
+********* QUERY **********
+UPDATE rpt_apollo.apollo_control_table
+set batch_id = 66, last_loaded_date = getdate() ,total_records_loaded =  (SELECT count(*) from rpt_apollo.ptab_d_product_full)
+WHERE sql_file_name = 'ptab_d_Product_Full.sql';
+**************************
+
+UPDATE 1
+********* QUERY **********
+INSERT INTO rpt_apollo.h_apollo_control_table
+(  h_apollo_control_table_id   ,
+   sql_file_name     ,
+   load_sequence           ,
+   include_in_load          ,  
+   last_loaded_date          ,
+   total_records_loaded  ,
+   batch_id
+)
+(select
+   apollo_control_table_id   ,
+   sql_file_name     ,
+   load_sequence           ,
+   include_in_load          ,  
+   last_loaded_date          ,
+   total_records_loaded  ,
+   batch_id
+from rpt_apollo.apollo_control_table
+WHERE sql_file_name =  'ptab_d_Product_Full.sql'
+);
+**************************
+
+INSERT 0 1
+CREATE TABLE INSERT 0 1823 VACUUM ANALYZE GRANT GRANT GRANT DROP TABLE ALTER TABLE ALTER TABLE UPDATE 1 INSERT 0 1
+Table ptab_d_Product_Full.sql load to rpt_apollo schema ended at Sat May 18 18:46:58 EDT 2019
+--------------------------------------------------------
+--------------------------------------------------------
+Table ptab_F_Interaction_Call.sql load to rpt_apollo schema started at Sat May 18 18:46:58 EDT 2019
+********* QUERY **********
+DROP TABLE IF EXISTS rpt_apollo.ptab_f_interactions_call_curr_old;
+**************************
+
+DROP TABLE
+********* QUERY **********
+CREATE TABLE IF NOT EXISTS rpt_apollo.ptab_f_interactions_call_curr_new
+(
+  interaction_id               bigint   ENCODE ZSTD,
+   is_parent_call               varchar(1)   ENCODE ZSTD,
+   detail_priority              numeric(2)   ENCODE ZSTD,
+   quantity                     numeric(22,7)   ENCODE ZSTD,
+   child_ld						varchar(255)    ENCODE ZSTD,
+   pre_call_notes               varchar(255)   ENCODE ZSTD,
+   discussion_num_of_attendees  numeric(22)   ENCODE ZSTD,
+   clm_id                       varchar(100)   ENCODE ZSTD,
+   display_order                numeric(22)   ENCODE ZSTD,
+   presentation_id              varchar(100)   ENCODE ZSTD,
+   slide_version                varchar(100)   ENCODE ZSTD,
+   key_message_start_time       timestamp   ENCODE ZSTD,
+   Call_Name                    varchar(80)   ENCODE ZSTD,
+   interaction_call_id          varchar(255)   ENCODE ZSTD,
+   datasource_id                varchar(30)  ,
+   account_id                   bigint   ENCODE ZSTD NOT NULL,
+   customer_id                  bigint  ENCODE ZSTD NOT NULL,
+   product_id                   bigint   ENCODE ZSTD NOT NULL,
+   employee_id                  bigint   ENCODE ZSTD ,
+   position_id                  bigint   ENCODE ZSTD NOT NULL,
+   day_id                       bigint   ENCODE ZSTD NOT NULL,
+   address_id                   bigint   ENCODE ZSTD,
+   isdeleted                    varchar(1)   ENCODE ZSTD,
+   territory_type            varchar(100) ,
+   market                    varchar(100) ENCODE ZSTD ,
+   therapeutic_class          varchar(100) ENCODE ZSTD,
+   therapeutic_sub_class      varchar(100)  ENCODE ZSTD,
+   week_ending_date           date         ENCODE ZSTD,
+   "day"                      date         ENCODE ZSTD,
+   source_unique_id           varchar(255)  ENCODE ZSTD,
+   
+   attendee_type       varchar(100)   ENCODE ZSTD,	
+   call_type              varchar(100)   ENCODE ZSTD,	
+   interaction_sub_type     varchar(100)   ENCODE ZSTD,	
+   interaction_type       varchar(100)   ENCODE ZSTD,	
+   detail_type              varchar(100)   ENCODE ZSTD,	
+   delivery_status          varchar(100)   ENCODE ZSTD,	
+   child_type               varchar(100)   ENCODE ZSTD,	
+   product_type             varchar(100)   ENCODE ZSTD,	
+   discussion_topics        varchar(100)   ENCODE ZSTD,	
+   product_strategy         varchar(100)   ENCODE ZSTD,	
+   clinical_research        varchar(100)   ENCODE ZSTD,	
+   discussion_class         varchar(100)   ENCODE ZSTD,	
+   device_trained           varchar(100)   ENCODE ZSTD,	
+   call_focus               varchar(100)   ENCODE ZSTD,	
+   category                 varchar(100)   ENCODE ZSTD,	
+   reaction                 varchar(100)   ENCODE ZSTD,	
+   activity_type            varchar(100)   ENCODE ZSTD,	
+   call_status              varchar(100)   ENCODE ZSTD,	
+   
+    Street_Address			varchar(110)  ENCODE ZSTD,
+	Best_Address_Flag		varchar(1)    ENCODE ZSTD,
+	City					varchar(50)	  ENCODE ZSTD,
+	Zipcode				    varchar(10)	  ENCODE ZSTD,
+	State                   varchar(50)   ENCODE ZSTD,
+	batch_id                       int     ENCODE ZSTD,
+  
+    Employee_Login			varchar(5)	  ENCODE ZSTD
+  
+)	
+COMPOUND SORTKEY (datasource_id, territory_type, market, therapeutic_class, therapeutic_sub_class, week_ending_date, day)   
+;
+**************************
+
+CREATE TABLE
+********* QUERY **********
+INSERT INTO rpt_apollo.ptab_f_interactions_call_curr_new
+(
+    interaction_id,
+       is_parent_call,
+       detail_priority,
+       quantity,
+	   child_ld,
+       pre_call_notes,
+       discussion_num_of_attendees,
+       clm_id,
+       display_order,
+       presentation_id,
+       slide_version,
+       key_message_start_time,
+       call_name,
+       interaction_call_id,
+       datasource_id,
+       account_id,
+       customer_id,
+       product_id,
+       employee_id,
+       position_id,
+       day_id,
+       address_id,
+       isdeleted,
+	   territory_type,
+       market,
+       therapeutic_class,
+       therapeutic_sub_class,
+       week_ending_date,
+       "day",
+	    source_unique_id   ,
+       attendee_type,
+       call_type,
+       interaction_sub_type,
+       interaction_type,
+       detail_type,
+       delivery_status,
+       child_type,
+       product_type,
+       discussion_topics,
+       product_strategy,
+       clinical_research,
+       discussion_class,
+       device_trained,
+       call_focus,
+       category,
+       reaction,
+       activity_type,
+       call_status,
+       street_address,
+       best_address_flag,
+       city,
+       zipcode,
+       state,
+	   batch_id ,
+       employee_login
+)
+(
+
+SELECT 
+  f_interactions_call.interaction_id               ,
+   CASE f_interactions_call.is_parent_call              
+   when 1 then 'Y'
+   else 'N'
+   end   ,
+   f_interactions_call.detail_priority              ,
+   f_interactions_call.quantity                     ,
+   f_interactions_call.child_ld                     ,
+   f_interactions_call.pre_call_notes               ,
+   f_interactions_call.discussion_num_of_attendees  ,
+   f_interactions_call.clm_id                       ,
+   f_interactions_call.display_order                ,
+   f_interactions_call.presentation_id              ,
+   f_interactions_call.slide_version                ,
+   f_interactions_call.key_message_start_time       ,
+   f_interactions_call.call_alt_id                  ,
+   f_interactions_call.interaction_call_id          ,
+   f_interactions_call.datasource_id                ,
+   NVL(f_interactions_call.account_id, -99999)                 ,
+   NVL(f_interactions_call.customer_id , -99999)                 ,
+   NVL(f_interactions_call.product_id   , -99999)                ,
+   f_interactions_call.employee_id                  ,
+   NVL(f_interactions_call.position_id  , -99999)                ,
+   NVL(f_interactions_call.day_id     , -99999)                  ,
+   f_interactions_call.address_id                   ,
+   f_interactions_call.isdeleted                   ,
+   case when pos.salesforce_value LIKE '%_O' THEN pos.salesforce_value else pos.type end as territory_type ,
+   case when prh_hierarchy_lvl < 12
+  then prh_top_hl_prod_name 
+  end as market,
+  case when prh_hierarchy_lvl < 10
+  then prh_hl9_product_name 
+  end as therapeutic_class,
+   case when prh_hierarchy_lvl < 9
+  then prh_hl8_product_name 
+  end as therapeutic_sub_class,
+   day.d_split_week_ending_date,
+   day.d_day_dt,
+    f_interactions_call.source_unique_id   ,
+   attendee_type_lov.value            ,	
+   call_type_lov.value                ,	
+   interaction_sub_type_lov.value     ,	
+   interaction_type_lov.value         ,	
+   detail_type_lov.value              ,	
+   delivery_status_lov.value          ,	
+   child_type_lov.value               ,	
+   product_type_lov.value             ,	
+   discussion_topics_lov.value        ,	
+   product_strategy_lov.value         ,	
+   clinical_research_lov.value        ,	
+   discussion_class_lov.value         ,	
+   device_trained_lov.value           ,	
+   call_focus_lov.value               ,	
+   category_lov.value                 ,	
+   reaction_lov.value                 ,	
+   activity_type_lov.value            ,	
+   call_status_lov.value              ,	
+   add.addr_ln1_txt,
+   add.best_addr_ind,
+   add.city_nm,
+   add.postl_cd,
+   add.st_provn_cd,
+   66,
+   emp.emp_initials		
+   
+FROM
+ rpt_facts.f_interactions_call f_interactions_call
+	LEFT JOIN rpt_dims.d_address add on (f_interactions_call.address_id = add.address_id)
+	LEFT JOIN rpt_dims.d_employee emp on (f_interactions_call.employee_id = emp.employee_id)
+	INNER JOIN rpt_dims.d_position pos ON (f_interactions_call.position_id = pos.position_id)
+	  LEFT JOIN rpt_apollo.ptab_d_product_full prod on prod.product_id = f_interactions_call.product_id
+  LEFT JOIN rpt_apollo.ptab_d_day_full day on day.day_id = f_interactions_call.day_id
+
+	LEFT JOIN rpt_dims.d_lov call_type_lov ON (f_interactions_call.call_type_lid = call_type_lov.lov_id and call_type_lov.type = 'CALL_TYPE_LID')
+	LEFT JOIN rpt_dims.d_lov interaction_sub_type_lov ON (f_interactions_call.interaction_sub_type_lid = interaction_sub_type_lov.lov_id and interaction_sub_type_lov.type ='INTERACTION_SUB_TYPE')
+	LEFT JOIN rpt_dims.d_lov interaction_type_lov ON (f_interactions_call.interaction_type_lid = interaction_type_lov.lov_id and interaction_type_lov.type ='INTERACTION_TYPE')
+	LEFT JOIN rpt_dims.d_lov detail_type_lov ON (f_interactions_call.detail_type_lid = detail_type_lov.lov_id and detail_type_lov.type = 'DETAIL_TYPE_LID')
+	LEFT JOIN rpt_dims.d_lov delivery_status_lov ON (f_interactions_call.delivery_status_lid = delivery_status_lov.lov_id and delivery_status_lov.type = 'DELIVERY_STATUS_LID')
+	LEFT JOIN rpt_dims.d_lov child_type_lov ON (f_interactions_call.child_type_lid = child_type_lov.lov_id and child_type_lov.type = 'CHILD_TYPE_LID')
+	LEFT JOIN rpt_dims.d_lov product_type_lov ON (f_interactions_call.product_type_lid = product_type_lov.lov_id and product_type_lov.type ='PRODUCT_TYPE')
+	LEFT JOIN rpt_dims.d_lov discussion_topics_lov ON (f_interactions_call.discussion_topics_lid = discussion_topics_lov.lov_id and discussion_topics_lov.type ='DISCUSSION_TOPICS_LID')
+	LEFT JOIN rpt_dims.d_lov product_strategy_lov ON (f_interactions_call.product_strategy_lid = product_strategy_lov.lov_id and product_strategy_lov.type = 'PRODUCT_STRATEGY_LID')
+	LEFT JOIN rpt_dims.d_lov clinical_research_lov ON (f_interactions_call.clinical_research_lid = clinical_research_lov.lov_id and clinical_research_lov.type = 'CLINICAL_RESEARCH_LID')
+	LEFT JOIN rpt_dims.d_lov discussion_class_lov ON (f_interactions_call.discussion_class_lid = discussion_class_lov.lov_id and discussion_class_lov.type = 'DISCUSSION_CLASS_LID')
+	LEFT JOIN rpt_dims.d_lov device_trained_lov ON (f_interactions_call.device_trained_lid = device_trained_lov.lov_id and device_trained_lov.type = 'DEVICE_TRAINED_LID')
+	LEFT JOIN rpt_dims.d_lov call_focus_lov ON (f_interactions_call.call_focus_lid = call_focus_lov.lov_id and call_focus_lov.type = 'CALL_FOCUS_LID')
+	LEFT JOIN rpt_dims.d_lov category_lov ON (f_interactions_call.category_lid = category_lov.lov_id and category_lov.type = 'CATEGORY')
+	LEFT JOIN rpt_dims.d_lov reaction_lov ON (f_interactions_call.reaction_lid = reaction_lov.lov_id and reaction_lov.type = 'REACTION_LID')
+	LEFT JOIN rpt_dims.d_lov activity_type_lov ON (f_interactions_call.activity_type_lid = activity_type_lov.lov_id and activity_type_lov.type = 'ACTIVITY_TYPE_LID')
+	LEFT JOIN rpt_dims.d_lov call_status_lov ON (f_interactions_call.call_status_lid = call_status_lov.lov_id and call_status_lov.type = 'CALL_STATUS_LID')
+    LEFT JOIN rpt_dims.d_lov attendee_type_lov ON (f_interactions_call.attendee_type_lid = attendee_type_lov.lov_id and attendee_type_lov.type = 'ATTENDEE_TYPE_LID')
+	
+WHERE f_interactions_call.isdeleted<>'Y' or f_interactions_call.isdeleted is null
+);
+**************************
+
+INSERT 0 70893422
+********* QUERY **********
+VACUUM FULL  rpt_apollo.ptab_f_interactions_call_curr_new to 99 PERCENT;
+**************************
+
+VACUUM
+********* QUERY **********
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.ptab_f_interactions_call_curr_new TO oasis_cdw_tst_procuser;
+**************************
+
+GRANT
+********* QUERY **********
+GRANT SELECT ON rpt_apollo.ptab_f_interactions_call_curr_new TO oasis_cdw_tst_tbl_read_user;
+**************************
+
+GRANT
+********* QUERY **********
+GRANT SELECT ON rpt_apollo.ptab_f_interactions_call_curr_new TO group oasis_cdw_tst_readuser_group;
+**************************
+
+GRANT
+********* QUERY **********
+CREATE TABLE IF NOT EXISTS rpt_apollo.ptab_f_interactions_call_curr
+(
+  interaction_id               bigint   ENCODE ZSTD
+);
+**************************
+
+CREATE TABLE
+********* QUERY **********
+ALTER TABLE  rpt_apollo.ptab_f_interactions_call_curr RENAME TO  ptab_f_interactions_call_curr_old;
+**************************
+
+ALTER TABLE
+********* QUERY **********
+ALTER TABLE  rpt_apollo.ptab_f_interactions_call_curr_new RENAME TO  ptab_f_interactions_call_curr;
+**************************
+
+ALTER TABLE
+********* QUERY **********
+UPDATE rpt_apollo.apollo_control_table
+set batch_id = 66, last_loaded_date = getdate() ,total_records_loaded =  (SELECT count(*) from rpt_apollo.ptab_f_interactions_call_curr)
+WHERE sql_file_name = 'ptab_F_Interaction_Call.sql';
+**************************
+
+UPDATE 1
+********* QUERY **********
+INSERT INTO rpt_apollo.h_apollo_control_table
+(  h_apollo_control_table_id   ,
+   sql_file_name     ,
+   load_sequence           ,
+   include_in_load          ,  
+   last_loaded_date          ,
+   total_records_loaded  ,
+   batch_id
+)
+(select
+   apollo_control_table_id   ,
+   sql_file_name     ,
+   load_sequence           ,
+   include_in_load          ,  
+   last_loaded_date          ,
+   total_records_loaded  ,
+   batch_id
+from rpt_apollo.apollo_control_table
+WHERE sql_file_name =  'ptab_F_Interaction_Call.sql'
+);
+**************************
+
+INSERT 0 1
+DROP TABLE CREATE TABLE INSERT 0 70893422 VACUUM GRANT GRANT GRANT psql:/opt/infa_shared/cdw/Infa_Adm/Scripts/apollo/SQLFiles/ptab_F_Interaction_Call.sql:247: INFO: Relation "ptab_f_interactions_call_curr" already exists and will be skipped CREATE TABLE ALTER TABLE ALTER TABLE UPDATE 1 INSERT 0 1
+Table ptab_F_Interaction_Call.sql load to rpt_apollo schema ended at Sat May 18 18:50:47 EDT 2019
+--------------------------------------------------------
+--------------------------------------------------------
+Table ptab_Sales_Nbrx_Terr.sql load to rpt_apollo schema started at Sat May 18 18:50:47 EDT 2019
+********* QUERY **********
+DROP TABLE IF EXISTS rpt_apollo.ptab_f_sales_nbrx_terr_old;
+**************************
+
+DROP TABLE
+********* QUERY **********
+CREATE TABLE IF NOT EXISTS rpt_apollo.ptab_f_sales_nbrx_terr_new
+(
+   ptab_f_sales_nbrx_terr_id  bigint IDENTITY ENCODE ZSTD,
+   customer_id           bigint  ENCODE ZSTD NOT NULL,
+   product_id            integer  ENCODE ZSTD NOT NULL,
+   day_id                integer  ENCODE ZSTD NOT NULL,
+   dynamics_type_id      integer  ,
+   position_id           integer  ENCODE ZSTD NOT NULL,
+    from_product_id       integer  ENCODE ZSTD NOT NULL,
+	territory_type            varchar(100) ,
+   market                    varchar(100) ENCODE ZSTD ,
+   therapeutic_class          varchar(100) ENCODE ZSTD,
+   therapeutic_sub_class      varchar(100)  ENCODE ZSTD,
+   week_ending_date           date         ENCODE ZSTD,
+   "day"                      date         ENCODE ZSTD,
+   nbrx_unaligned_id     varchar(255)  ENCODE ZSTD,
+   poa_id                integer  ENCODE ZSTD,
+   apportionment_nbrx    numeric(22,7)  ENCODE ZSTD,
+   apportionment_ltrx    numeric(22,7)  ENCODE ZSTD,
+ 
+   
+   source_of_business		  varchar(50)  ENCODE ZSTD,
+   
+   brand_eligibility_flag  varchar(5)      ENCODE ZSTD,
+   datasource_id           varchar(30)     ENCODE ZSTD,
+   batch_id                       int     ENCODE ZSTD,
+   source_unique_id        varchar(30)     ENCODE ZSTD
+   
+)
+DISTKEY(ptab_f_sales_nbrx_terr_id)
+COMPOUND SORTKEY (dynamics_type_id, territory_type, market, therapeutic_class, therapeutic_sub_class, week_ending_date, day, ptab_f_sales_nbrx_terr_id) 
+;
+**************************
+
+CREATE TABLE
+********* QUERY **********
+INSERT INTO rpt_apollo.ptab_f_sales_nbrx_terr_new
+(      customer_id,
+       product_id,
+       day_id,
+       dynamics_type_id,
+       position_id,
+	    from_product_id,
+		territory_type,
+       market,
+       therapeutic_class,
+       therapeutic_sub_class,
+       week_ending_date,
+       "day",
+       nbrx_unaligned_id,
+       poa_id,
+       apportionment_nbrx,
+       apportionment_ltrx,
+	    source_of_business,
+		brand_eligibility_flag,
+        datasource_id,
+		batch_id ,
+		source_unique_id
+)
+  
+(
+
+
+SELECT 
+   nvl(n.customer_id, -99999)           ,
+   nvl(n.product_id, -99999)             ,
+   nvl(n.day_id, -99999)                 ,
+      n.dynamics_type_id        ,
+   nvl(fca.position_id, -99999)           ,
+   nvl(n.from_product_id, -99999)         ,
+    case when pos.salesforce_value LIKE '%_O' THEN pos.salesforce_value else pos.type end as territory_type ,
+   case when prod.prh_hierarchy_lvl < 12
+  then prod.prh_top_hl_prod_name 
+  end as market,
+  case when prod.prh_hierarchy_lvl < 10
+  then prod.prh_hl9_product_name 
+  end as therapeutic_class,
+   case when prod.prh_hierarchy_lvl < 9
+  then prod.prh_hl8_product_name 
+  end as therapeutic_sub_class,
+   day.d_split_week_ending_date,
+   day.d_day_dt,
+   n.nbrx_unaligned_id       ,
+   cast(n.poa_id as integer)                  ,
+   
+   NVL(CAST(n.nbrx * fca.apportionment_factor AS numeric(22,7)),0)       ,
+   NVL(CAST(n.ltrx * fca.apportionment_factor AS numeric (22,7)) ,0)     ,
+   
+   nbrx_dynamics_lov.name		 ,
+   
+   brand_eligibility_lov.value  ,
+   n.datasource_id,
+   66,
+   n.source_unique_id
+ FROM
+  rpt_facts.f_sales_nbrx_unaligned n
+    INNER JOIN 
+  (SELECT fca.customer_id, fca.position_id, fca.poa_id, fca.alignment_level, fca.sales_team, fca.alignment_name, fca.apportionment_factor, fca.datasource_id, fca.overlay_position_id, fca.zip
+  from rpt_facts.f_customer_alignment fca
+  group by fca.customer_id, fca.position_id, fca.poa_id, fca.alignment_level, fca.sales_team, fca.alignment_name, fca.apportionment_factor, fca.datasource_id, fca.overlay_position_id, fca.zip)
+  fca ON (fca.customer_id = n.customer_id)
+  INNER JOIN rpt_dims.d_poa poa2 ON (poa2.poa_id = fca.poa_id)
+  INNER JOIN rpt_dims.d_position pos ON (fca.position_id = pos.position_id)
+  INNER JOIN rpt_dims.d_position_hierarchy phi ON (pos.position_id = phi.position_id)
+  INNER JOIN rpt_dims.d_poa poa ON (phi.poa_id=poa.poa_id)
+  INNER JOIN rpt_apollo.ptab_d_product_full prod on prod.product_id = n.product_id
+  LEFT JOIN rpt_apollo.ptab_d_day_full day on day.day_id = n.day_id
+  LEFT JOIN rpt_dims.d_lov nbrx_dynamics_lov ON (nbrx_dynamics_lov.lov_id = n.dynamics_type_id and nbrx_dynamics_lov.type='NBRX_DYNAMICS_TYPE')
+  LEFT JOIN rpt_dims.d_lov brand_eligibility_lov on (brand_eligibility_lov.lov_id = n.brand_eligibility_id and brand_eligibility_lov.type ='YES_NO_FLAG')
+  WHERE (poa.active_flag = 'CURRENT' and poa2.active_flag = 'CURRENT') and fca.alignment_level = 'TERRITORY' AND fca.datasource_id in ( 'PROF' ,'PROF_NBRX') AND UPPER(poa2.type) like '%SALES%'
+  and phi.sales_force in ( 
+  
+  'HSDE','DIABETES CARE')
+  and n.datasource_id = 'DIAB_NBRX'
+UNION ALL
+
+SELECT 
+   nvl(n.customer_id, -99999)           ,
+   nvl(n.product_id, -99999)             ,
+   nvl(n.day_id, -99999)                 ,
+      n.dynamics_type_id        ,
+   nvl(fca.position_id, -99999)           ,
+   nvl(n.from_product_id, -99999)         ,
+    case when pos.salesforce_value LIKE '%_O' THEN pos.salesforce_value else pos.type end as territory_type ,
+   case when prod.prh_hierarchy_lvl < 12
+  then prod.prh_top_hl_prod_name 
+  end as market,
+  case when prod.prh_hierarchy_lvl < 10
+  then prod.prh_hl9_product_name 
+  end as therapeutic_class,
+   case when prod.prh_hierarchy_lvl < 9
+  then prod.prh_hl8_product_name 
+  end as therapeutic_sub_class,
+   day.d_split_week_ending_date,
+   day.d_day_dt,
+   n.nbrx_unaligned_id       ,
+   cast(n.poa_id as integer)                  ,
+   
+   NVL(CAST(n.nbrx * fca.apportionment_factor AS numeric(22,7)),0)       ,
+   NVL(CAST(n.ltrx * fca.apportionment_factor AS numeric (22,7)) ,0)     ,
+   
+   nbrx_dynamics_lov.name		 ,
+   
+   brand_eligibility_lov.value  ,
+    n.datasource_id,
+	66,
+   n.source_unique_id
+FROM
+  
+  rpt_facts.f_sales_nbrx_unaligned n
+    INNER JOIN 
+  (SELECT fca.customer_id, fca.position_id, fca.poa_id, fca.alignment_level, fca.sales_team, fca.alignment_name, fca.apportionment_factor, fca.datasource_id, fca.overlay_position_id, fca.zip
+  from rpt_facts.f_customer_alignment fca
+  group by fca.customer_id, fca.position_id, fca.poa_id, fca.alignment_level, fca.sales_team, fca.alignment_name, fca.apportionment_factor, fca.datasource_id, fca.overlay_position_id, fca.zip)
+  fca ON (fca.customer_id = n.customer_id)
+   INNER JOIN rpt_dims.d_poa poa2 ON (poa2.poa_id = fca.poa_id)
+  INNER JOIN rpt_dims.d_position pos ON (fca.position_id = pos.position_id)
+  INNER JOIN rpt_dims.d_position_hierarchy phi ON (pos.position_id = phi.position_id)
+  INNER JOIN rpt_dims.d_poa poa ON (phi.poa_id=poa.poa_id)
+  INNER JOIN rpt_apollo.ptab_d_product_full prod on prod.product_id = n.product_id
+  INNER JOIN rpt_apollo.ptab_d_day_full day on day.day_id = n.day_id
+  LEFT JOIN rpt_dims.d_lov nbrx_dynamics_lov ON (nbrx_dynamics_lov.lov_id = n.dynamics_type_id and nbrx_dynamics_lov.type='NBRX_DYNAMICS_TYPE')
+  LEFT JOIN rpt_dims.d_lov brand_eligibility_lov on (brand_eligibility_lov.lov_id = n.brand_eligibility_id and brand_eligibility_lov.type ='YES_NO_FLAG')
+  
+  WHERE (poa.active_flag = 'CURRENT' and poa2.active_flag = 'CURRENT') and fca.alignment_level = 'TERRITORY' AND fca.datasource_id in ( 'PROF' ,'PROF_NBRX') AND UPPER(poa2.type) like '%SALES%'
+  and phi.sales_force in ( 
+  
+  'AOM','OEP')
+  and n.datasource_id = 'AOB_NBRX'
+);
+**************************
+
+INSERT 0 1305175289
+********* QUERY **********
+VACUUM FULL  rpt_apollo.ptab_f_sales_nbrx_terr_new to 99 PERCENT;
+**************************
+
+VACUUM
+********* QUERY **********
+ANALYZE  rpt_apollo.ptab_f_sales_nbrx_terr_new ;
+**************************
+
+ANALYZE
+********* QUERY **********
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.ptab_f_sales_nbrx_terr_new TO oasis_cdw_tst_procuser;
+**************************
+
+GRANT
+********* QUERY **********
+GRANT SELECT ON rpt_apollo.ptab_f_sales_nbrx_terr_new TO oasis_cdw_tst_tbl_read_user;
+**************************
+
+GRANT
+********* QUERY **********
+GRANT SELECT ON rpt_apollo.ptab_f_sales_nbrx_terr_new TO group oasis_cdw_tst_readuser_group;
+**************************
+
+GRANT
+********* QUERY **********
+CREATE TABLE IF NOT EXISTS rpt_apollo.ptab_f_sales_nbrx_terr
+(
+   customer_id           bigint  ENCODE ZSTD NOT NULL
+);
+**************************
+
+CREATE TABLE
+********* QUERY **********
+ALTER TABLE rpt_apollo.ptab_f_sales_nbrx_terr RENAME TO ptab_f_sales_nbrx_terr_old;
+**************************
+
+ALTER TABLE
+********* QUERY **********
+ALTER TABLE rpt_apollo.ptab_f_sales_nbrx_terr_new RENAME TO ptab_f_sales_nbrx_terr;
+**************************
+
+ALTER TABLE
+********* QUERY **********
+UPDATE rpt_apollo.apollo_control_table
+set batch_id = 66, last_loaded_date = getdate() ,total_records_loaded =  (SELECT count(*) from rpt_apollo.ptab_f_sales_nbrx_terr)
+WHERE sql_file_name = 'ptab_Sales_Nbrx_Terr.sql';
+**************************
+
+UPDATE 1
+********* QUERY **********
+INSERT INTO rpt_apollo.h_apollo_control_table
+(  h_apollo_control_table_id   ,
+   sql_file_name     ,
+   load_sequence           ,
+   include_in_load          ,  
+   last_loaded_date          ,
+   total_records_loaded  ,
+   batch_id
+)
+(select
+   apollo_control_table_id   ,
+   sql_file_name     ,
+   load_sequence           ,
+   include_in_load          ,  
+   last_loaded_date          ,
+   total_records_loaded  ,
+   batch_id
+from rpt_apollo.apollo_control_table
+WHERE sql_file_name =  'ptab_Sales_Nbrx_Terr.sql'
+);
+**************************
+
+INSERT 0 1
+DROP TABLE CREATE TABLE INSERT 0 1305175289 VACUUM ANALYZE GRANT GRANT GRANT psql:/opt/infa_shared/cdw/Infa_Adm/Scripts/apollo/SQLFiles/ptab_Sales_Nbrx_Terr.sql:202: INFO: Relation "ptab_f_sales_nbrx_terr" already exists and will be skipped CREATE TABLE ALTER TABLE ALTER TABLE UPDATE 1 INSERT 0 1
+Table ptab_Sales_Nbrx_Terr.sql load to rpt_apollo schema ended at Sat May 18 19:20:06 EDT 2019
+--------------------------------------------------------
+--------------------------------------------------------
+Table ptab_Sales_Xptrx_Terr.sql load to rpt_apollo schema started at Sat May 18 19:20:06 EDT 2019
+********* QUERY **********
+DROP TABLE IF EXISTS rpt_apollo.ptab_f_sales_xptrx_terr_old;
+**************************
+
+DROP TABLE
+********* QUERY **********
+CREATE TABLE IF NOT EXISTS rpt_apollo.ptab_f_sales_xptrx_terr_new
+(
+   ptab_f_sales_xptrx_terr_id  bigint IDENTITY ENCODE ZSTD,
+   xpt_trx_ins_niad_aob_id  bigint ENCODE ZSTD,
+   customer_id              integer ENCODE ZSTD NOT NULL,
+   position_id              integer  ENCODE ZSTD NOT NULL,
+   product_id               integer ENCODE ZSTD NOT NULL,
+   day_id                   integer NOT NULL,
+   poa_id                   integer ENCODE ZSTD,
+   plan_id                  integer  NOT NULL,
+   territory_type            varchar(100) ,
+   market                    varchar(100) ENCODE ZSTD ,
+   therapeutic_class          varchar(100) ENCODE ZSTD,
+   therapeutic_sub_class      varchar(100)  ENCODE ZSTD,
+   week_ending_date           date         ENCODE ZSTD,
+   "day"                      date         ENCODE ZSTD,
+   apportionment_niad_trx   numeric(22,7) ENCODE ZSTD,
+   apportionment_niad_nrx   numeric(22,7) ENCODE ZSTD,
+   apportionment_trx        numeric(22,7) ENCODE ZSTD,
+   apportionment_nrx        numeric(22,7) ENCODE ZSTD,
+   category                 integer ENCODE ZSTD,
+   zip                      varchar(10) ENCODE ZSTD,
+   
+   brand_eligibility_flag   varchar(100) ENCODE ZSTD,
+   first_time_writer_flag      varchar(100) ENCODE ZSTD,
+   recurrent_writer_flag     varchar(100)   ENCODE ZSTD,
+   recurrent_writer_alt_flag    varchar(100)  ENCODE ZSTD,
+   plan_exclusion_flag			varchar (100)  ENCODE ZSTD,
+    datasource_id           varchar(30)     ENCODE ZSTD,
+	batch_id                       int     ENCODE ZSTD,
+   source_unique_id        varchar(30)     ENCODE ZSTD
+ 
+)
+DISTKEY(ptab_f_sales_xptrx_terr_id)
+COMPOUND SORTKEY (territory_type, market, therapeutic_class, therapeutic_sub_class, week_ending_date, day,  ptab_f_sales_xptrx_terr_id) 
+;
+**************************
+
+CREATE TABLE
+********* QUERY **********
+INSERT INTO rpt_apollo.ptab_f_sales_xptrx_terr_new
+(
+   xpt_trx_ins_niad_aob_id,
+       customer_id,
+       position_id,
+       product_id,
+       day_id,
+       poa_id,
+       plan_id,
+	   apportionment_niad_trx,
+       apportionment_niad_nrx,
+       apportionment_trx,
+       apportionment_nrx,
+	   territory_type,
+       market,
+       therapeutic_class,
+       therapeutic_sub_class,
+       week_ending_date,
+       "day",
+       category,
+       zip,
+       brand_eligibility_flag,
+       first_time_writer_flag,
+       recurrent_writer_flag,
+       recurrent_writer_alt_flag,
+	   plan_exclusion_flag   ,
+	   datasource_id,
+	   batch_id,
+		source_unique_id
+		
+  
+)
+  
+(
+
+
+SELECT 
+   n.xptrx_ins_niad_unaligned_id  ,
+   NVL(n.customer_id , -99999)              ,
+   NVL(fca.position_id  , -99999)             ,
+   NVL(n.product_id   , -99999)              ,
+   n.week_id                   ,
+   poa2.poa_id                    ,
+   NVL(n.plan_id      , -99999)             ,
+   nvl(CAST(n.niad_trx * fca.apportionment_factor as numeric(22,7)), 0)  ,
+   nvl(CAST(n.niad_nrx * fca.apportionment_factor as numeric(22,7)), 0)   ,
+   nvl(CAST(n.trx * fca.apportionment_factor as numeric(22,7)), 0)       ,          
+   nvl(CAST(n.nrx * fca.apportionment_factor AS numeric(22,7)), 0)        ,
+   case when pos.salesforce_value LIKE '%_O' THEN pos.salesforce_value else pos.type end as territory_type ,
+   case when prh_hierarchy_lvl < 12
+  then prh_top_hl_prod_name 
+  end as market,
+  case when prh_hierarchy_lvl < 10
+  then prh_hl9_product_name 
+  end as therapeutic_class,
+   case when prh_hierarchy_lvl < 9
+  then prh_hl8_product_name 
+  end as therapeutic_sub_class,
+   day.d_split_week_ending_date,
+   day.d_day_dt,
+   n.category                  ,
+   n.zip                      ,
+   brand_eligibility_lov.value  ,
+   fst_tm_wrtr_flag_lov.value    ,
+   recurrent_writer_lov.value    ,
+   recurrent_writer_alt_lov.value  ,
+   plan_exclusion_lov.value         ,
+   n.datasource_id,
+   66,
+   n.source_unique_id
+   
+  
+   
+FROM
+  rpt_facts.f_sales_xptrx_ins_niad_unaligned n
+  INNER JOIN 
+  (SELECT fca.customer_id, fca.position_id, fca.poa_id, fca.alignment_level, fca.alignment_name, fca.sales_team, fca.apportionment_factor, fca.datasource_id, fca.overlay_position_id, fca.zip
+  from rpt_facts.f_customer_alignment fca
+  group by fca.customer_id, fca.position_id, fca.poa_id, fca.alignment_level,  fca.sales_team, fca.alignment_name, fca.apportionment_factor, fca.datasource_id, fca.overlay_position_id, fca.zip)
+  fca on (fca.customer_id = n.customer_id)
+  INNER JOIN rpt_dims.d_poa poa2 ON (poa2.poa_id = fca.poa_id)
+  INNER JOIN rpt_dims.d_position pos ON (fca.position_id = pos.position_id)
+  INNER JOIN rpt_dims.d_position_hierarchy phi ON (pos.position_id = phi.position_id)
+  INNER JOIN rpt_dims.d_poa poa ON (phi.poa_id=poa.poa_id)
+  INNER JOIN rpt_apollo.ptab_d_product_full prod on prod.product_id = n.product_id
+  INNER JOIN rpt_apollo.ptab_d_day_full day on day.day_id = n.week_id
+  LEFT JOIN rpt_dims.d_lov brand_eligibility_lov on n.brand_eligibility_id = brand_eligibility_lov.lov_id and brand_eligibility_lov.type ='YES_NO_FLAG'
+  LEFT JOIN rpt_dims.d_lov fst_tm_wrtr_flag_lov on n.fst_tm_wrtr_flag_id = fst_tm_wrtr_flag_lov.lov_id and fst_tm_wrtr_flag_lov.type ='YES_NO_FLAG'
+  LEFT JOIN rpt_dims.d_lov recurrent_writer_lov on n.recurrent_writer_id = recurrent_writer_lov.lov_id and recurrent_writer_lov.type ='YES_NO_FLAG'
+  LEFT JOIN rpt_dims.d_lov recurrent_writer_alt_lov on n.recurrent_writer_alt_id = recurrent_writer_alt_lov.lov_id and recurrent_writer_alt_lov.type ='YES_NO_FLAG'
+  LEFT JOIN rpt_dims.d_lov plan_exclusion_lov on n.plan_exclusion_id = plan_exclusion_lov.lov_id and plan_exclusion_lov.type ='YES_NO_FLAG'
+  WHERE (poa.active_flag = 'CURRENT' and poa2.active_flag = 'CURRENT')   
+  and fca.alignment_level = 'TERRITORY' 
+  AND fca.datasource_id in ( 'PROF') 
+  and UPPER(poa2.type) like '%SALES%' 
+  
+  and phi.sales_force in ( 
+  
+  'HSDE','DIABETES CARE') 
+UNION ALL
+
+SELECT 
+   n.xptrx_aob_unaligned_id  ,
+   n.customer_id               ,
+   fca.position_id               ,
+   n.product_id                ,
+   n.week_id                   ,
+   poa2.poa_id                    ,
+   n.plan_id                   ,
+   0  ,
+   0  ,
+   nvl(CAST(n.trx * fca.apportionment_factor as numeric(22,7)), 0)       ,          
+   nvl(CAST(n.nrx * fca.apportionment_factor AS numeric(22,7)), 0)        ,
+   case when pos.salesforce_value LIKE '%_O' THEN pos.salesforce_value else pos.type end as territory_type ,
+   case when prh_hierarchy_lvl < 12
+  then prh_top_hl_prod_name 
+  end as market,
+  case when prh_hierarchy_lvl < 10
+  then prh_hl9_product_name 
+  end as therapeutic_class,
+   case when prh_hierarchy_lvl < 9
+  then prh_hl8_product_name 
+  end as therapeutic_sub_class,
+   day.d_split_week_ending_date,
+   day.d_day_dt,
+   n.category                  ,
+   n.zip                      ,
+   brand_eligibility_lov.value  ,
+   fst_tm_wrtr_flag_lov.value    ,
+   recurrent_writer_lov.value    ,
+   recurrent_writer_alt_lov.value  ,
+     plan_exclusion_lov.value       ,
+	    n.datasource_id,
+		66,
+   n.source_unique_id
+	 FROM
+  rpt_facts.f_sales_xptrx_aob_unaligned n
+  INNER JOIN
+  (SELECT fca.customer_id, fca.position_id, fca.poa_id, fca.alignment_level, fca.sales_team, fca.alignment_name, fca.apportionment_factor, fca.datasource_id, fca.overlay_position_id, fca.zip
+  from rpt_facts.f_customer_alignment fca
+  group by fca.customer_id, fca.position_id, fca.poa_id, fca.alignment_level,  fca.sales_team, fca.apportionment_factor, fca.alignment_name, fca.datasource_id, fca.overlay_position_id, fca.zip)
+  fca on (fca.customer_id = n.customer_id)
+  INNER JOIN rpt_dims.d_poa poa2 ON (poa2.poa_id = fca.poa_id)
+  INNER JOIN rpt_dims.d_position pos ON (fca.position_id = pos.position_id)
+  INNER JOIN rpt_dims.d_position_hierarchy phi ON (pos.position_id = phi.position_id)
+  INNER JOIN rpt_dims.d_poa poa ON (phi.poa_id=poa.poa_id)
+  INNER JOIN rpt_apollo.ptab_d_product_full prod on prod.product_id = n.product_id
+  INNER JOIN rpt_apollo.ptab_d_day_full day on day.day_id = n.week_id
+  LEFT JOIN rpt_dims.d_lov brand_eligibility_lov on n.brand_eligibility_id = brand_eligibility_lov.lov_id and brand_eligibility_lov.type ='YES_NO_FLAG'
+  LEFT JOIN rpt_dims.d_lov fst_tm_wrtr_flag_lov on n.fst_tm_wrtr_flag_id = fst_tm_wrtr_flag_lov.lov_id and fst_tm_wrtr_flag_lov.type ='YES_NO_FLAG'
+  LEFT JOIN rpt_dims.d_lov recurrent_writer_lov on n.recurrent_writer_id = recurrent_writer_lov.lov_id and recurrent_writer_lov.type ='YES_NO_FLAG'
+  LEFT JOIN rpt_dims.d_lov recurrent_writer_alt_lov on n.recurrent_writer_alt_id = recurrent_writer_alt_lov.lov_id and recurrent_writer_alt_lov.type ='YES_NO_FLAG'
+  LEFT JOIN rpt_dims.d_lov plan_exclusion_lov on n.plan_exclusion_id = plan_exclusion_lov.lov_id and plan_exclusion_lov.type ='YES_NO_FLAG'
+  WHERE (poa.active_flag = 'CURRENT' and poa2.active_flag = 'CURRENT')  
+  and fca.alignment_level = 'TERRITORY' 
+  AND fca.datasource_id in ( 'PROF') 
+  and UPPER(poa2.type) like '%SALES%' 
+   
+  and phi.sales_force in ( 
+  
+  'AOM','OEP')
+ )
+ ;
+**************************
+
+INSERT 0 700793377
+********* QUERY **********
+VACUUM FULL  rpt_apollo.ptab_f_sales_xptrx_terr_new to 99 PERCENT;
+**************************
+
+VACUUM
+********* QUERY **********
+ANALYZE rpt_apollo.ptab_f_sales_xptrx_terr_new;
+**************************
+
+ANALYZE
+********* QUERY **********
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.ptab_f_sales_xptrx_terr_new TO oasis_cdw_tst_procuser;
+**************************
+
+GRANT
+********* QUERY **********
+GRANT SELECT ON rpt_apollo.ptab_f_sales_xptrx_terr_new TO oasis_cdw_tst_tbl_read_user;
+**************************
+
+GRANT
+********* QUERY **********
+GRANT SELECT ON rpt_apollo.ptab_f_sales_xptrx_terr_new TO group oasis_cdw_tst_readuser_group;
+**************************
+
+GRANT
+********* QUERY **********
+CREATE TABLE IF NOT EXISTS rpt_apollo.ptab_f_sales_xptrx_terr
+(
+   customer_id           bigint  ENCODE ZSTD NOT NULL
+);
+**************************
+
+CREATE TABLE
+********* QUERY **********
+ALTER TABLE rpt_apollo.ptab_f_sales_xptrx_terr RENAME TO ptab_f_sales_xptrx_terr_old;
+**************************
+
+ALTER TABLE
+********* QUERY **********
+ALTER TABLE rpt_apollo.ptab_f_sales_xptrx_terr_new RENAME TO ptab_f_sales_xptrx_terr;
+**************************
+
+ALTER TABLE
+********* QUERY **********
+UPDATE rpt_apollo.apollo_control_table
+set batch_id = 66, last_loaded_date = getdate() ,total_records_loaded =  (SELECT count(*) from rpt_apollo.ptab_f_sales_xptrx_terr)
+WHERE sql_file_name = 'ptab_Sales_Xptrx_Terr.sql';
+**************************
+
+UPDATE 1
+********* QUERY **********
+INSERT INTO rpt_apollo.h_apollo_control_table
+(  h_apollo_control_table_id   ,
+   sql_file_name     ,
+   load_sequence           ,
+   include_in_load          ,  
+   last_loaded_date          ,
+   total_records_loaded  ,
+   batch_id
+)
+(select
+   apollo_control_table_id   ,
+   sql_file_name     ,
+   load_sequence           ,
+   include_in_load          ,  
+   last_loaded_date          ,
+   total_records_loaded  ,
+   batch_id
+from rpt_apollo.apollo_control_table
+WHERE sql_file_name =  'ptab_Sales_Xptrx_Terr.sql'
+);
+**************************
+
+INSERT 0 1
+DROP TABLE CREATE TABLE INSERT 0 700793377 VACUUM ANALYZE GRANT GRANT GRANT psql:/opt/infa_shared/cdw/Infa_Adm/Scripts/apollo/SQLFiles/ptab_Sales_Xptrx_Terr.sql:232: INFO: Relation "ptab_f_sales_xptrx_terr" already exists and will be skipped CREATE TABLE ALTER TABLE ALTER TABLE UPDATE 1 INSERT 0 1
+Table ptab_Sales_Xptrx_Terr.sql load to rpt_apollo schema ended at Sat May 18 19:35:11 EDT 2019
+--------------------------------------------------------
+Exit Code : 0 
+Load of rpt_apollo schema completed successfully at Sat May 18 19:35:11 EDT 2019
+Script ends at Sat May 18 19:35:11 EDT 2019 
+Load process of rpt_apollo schema finished at Sat May 18 19:35:11 EDT 2019

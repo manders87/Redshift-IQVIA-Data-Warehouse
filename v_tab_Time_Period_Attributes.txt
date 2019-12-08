@@ -1,0 +1,23 @@
+DROP VIEW IF EXISTS rpt_apollo.v_tab_Time_Period_Attributes;
+
+CREATE VIEW rpt_apollo.v_tab_Time_Period_Attributes AS
+(
+SELECT 	day_id,
+        d_day_dt as "Day"                  ,
+		d_split_week_ending_date  as "Week Ending Date"  ,
+		d_poa as "Activity Poa Name Diabetes",
+		d_poa_aom as "Activity Poa Name AOM",
+		d_sales_poa as "Sales Poa Name Diabetes",
+		d_sales_poa_aom as "Sales Poa Name AOM"
+FROM rpt_apollo.ptab_d_day_full
+)
+WITH NO SCHEMA BINDING;
+
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.v_tab_Time_Period_Attributes TO oasis_cdw_tst_procuser;
+GRANT SELECT ON rpt_apollo.v_tab_Time_Period_Attributes TO group oasis_cdw_tst_readuser_group;
+
+-- Check for Compile of VIEW
+SELECT *
+FROM rpt_apollo.v_tab_Time_Period_Attributes
+LIMIT 1;
+

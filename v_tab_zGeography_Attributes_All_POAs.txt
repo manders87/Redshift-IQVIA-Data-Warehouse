@@ -1,0 +1,88 @@
+DROP VIEW IF EXISTS rpt_apollo.v_tab_Geography_Attributes_All_POAs;
+--Created this version of the Geography view so that Activity Data, which is unaligned, could still be exposed within the latest position hierarchy
+-- OBIEE excludes this data currently but Tableau users can the Retired Position Indicator to exclude or include this data
+
+CREATE VIEW rpt_apollo.v_tab_Geography_Attributes_All_POAs AS
+(
+--Using a Nest Select so that the latest position indicator can first be calculated and then used to display the last position hierarchy information for retired position ids
+SELECT 
+position_id,
+"Salesforce Value",
+"Territory Type",
+"Active Territory Flag",
+"Salesforce Geography Id" ,
+"Salesforce Geography",
+"Area Id",
+"Area",
+"Region Id" ,
+"Region",
+"District Id",
+"District",
+"Pod Id",
+"Pod",
+"Territory Id",
+"Territory",
+"POA Type",
+"POA Name",
+ poa_id,
+ "Retired Position Indicator",
+ "POA Start Day",
+ "POA End Date",
+ "Geo Archtype"
+FROM
+(SELECT position_id,
+        --Position 
+   pos_salesforce_value as "Salesforce Value"       ,
+   case when pos_salesforce_value LIKE '%_O' THEN pos_salesforce_value else pos_type end as "Territory Type"                ,
+   pos_type_flag as  "Active Territory Flag",
+   --SalesForce Geography
+   phi_top_hl_position_id as "Salesforce Geography Id"    ,
+   phi_top_hl_position_name as "Salesforce Geography"       ,
+   -- Area
+   phi_hl8_position_id  as "Area Id"        ,
+   phi_hl8_position_name   as "Area"     ,
+   --Region
+   phi_hl7_position_id    as "Region Id"      ,
+   phi_hl7_position_name  as "Region"     ,
+   --District
+   phi_hl6_position_id  as "District Id"        ,
+   phi_hl6_position_name  as  "District"      ,
+   --POD
+   phi_hl5_position_id   as "Pod Id"       ,
+   phi_hl5_position_name   as "Pod"     ,
+   --Territory
+   phi_hl4_position_id  as "Territory Id"        ,
+   phi_hl4_position_name    as "Territory"    ,
+   --POA Information
+   poa_type       as "POA Type"          ,
+   poa_name    as "POA Name"            ,
+   poa_poa_id as poa_id,
+   case when
+   row_number() over (PARTITION BY  position_id order by poa_start.day desc)
+   = 1 then 'Yes' else 'No' end as "Latest_Position_Indicator",
+   case when sum(case when poa_active_flag = 'CURRENT' then 1 else 0 end) over (partition by position_id) > 0
+   then 'No' else 'Yes' end as "Retired Position Indicator",
+   poa_start.day   as "POA Start Day"    ,
+   poa_end.day     as "POA End Date"   ,
+--Geo Archtype is used by the AOM business and is unique across POA periods   
+   psg_archetype_flag as "Geo Archtype"
+	   FROM rpt_apollo.ptab_d_position_full
+--Providing the start and end dates of POA periods so users can see when a position was retired from alignment  
+	   left join rpt_apollo.v_tab_Time_Period_Attributes poa_start on poa_start.day_id = poa_start_date_id
+	   left join rpt_apollo.v_tab_Time_Period_Attributes poa_end on poa_end.day_id = poa_end_date_id
+-- This ensures that no duplication is introduced from the employee bridge or employee data in the position_full table	   
+where poa_row_number < 2
+)
+where "Latest_Position_Indicator" = 'Yes'
+)
+WITH NO SCHEMA BINDING;
+
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.v_tab_Geography_Attributes_All_POAs TO oasis_cdw_tst_procuser;
+GRANT SELECT ON rpt_apollo.v_tab_Geography_Attributes_All_POAs TO group oasis_cdw_tst_readuser_group;
+
+-- Check for Compile of VIEW
+SELECT *
+FROM rpt_apollo.v_tab_Geography_Attributes_All_POAs
+LIMIT 1;
+
+

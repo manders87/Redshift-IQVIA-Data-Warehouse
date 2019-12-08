@@ -1,0 +1,252 @@
+--Include all keys and fact attributes from f_sales_xptrx
+--Include most commonly used dimensional attributes with high cardinality (territory_type, therapeutic_class, therapeutic_sub_class)
+
+
+--Adding Start Time
+--Updating latest run stats to apollo control table
+UPDATE rpt_apollo.apollo_control_table
+set last_start_date = getdate(), status = 'Started' 
+WHERE sql_file_name = :'sqlfilename';
+
+
+--Creating fact table that includes commonly used dimensional attributes
+-- REM Add compression encoding
+-- REM Add sort key & distribution
+-- All sort keys should be encoded raw and all other fields set to ZSTD encoding
+-- Fact tables should be distributed even or keyed on the largest dimensional table commonly joined
+
+DROP TABLE IF EXISTS :loadschema.ptab_f_sales_xptrx_terr_old;
+
+CREATE TABLE IF NOT EXISTS :loadschema.ptab_f_sales_xptrx_terr_new
+(
+   ptab_f_sales_xptrx_terr_id  bigint IDENTITY ENCODE ZSTD,
+   xpt_trx_ins_niad_aob_id  bigint ENCODE ZSTD,
+   customer_id              integer ENCODE ZSTD NOT NULL,
+   position_id              integer  ENCODE ZSTD NOT NULL,
+   product_id               integer ENCODE ZSTD NOT NULL,
+   day_id                   integer NOT NULL,
+   poa_id                   integer ENCODE ZSTD,
+   plan_id                  integer  NOT NULL,
+   territory_type            varchar(100) ,
+   market                    varchar(100) ENCODE ZSTD ,
+   therapeutic_class          varchar(100) ENCODE ZSTD,
+   therapeutic_sub_class      varchar(100)  ENCODE ZSTD,
+   week_ending_date           date         ENCODE ZSTD,
+   "day"                      date         ENCODE ZSTD,
+   apportionment_niad_trx   numeric(22,7) ENCODE ZSTD,
+   apportionment_niad_nrx   numeric(22,7) ENCODE ZSTD,
+   apportionment_trx        numeric(22,7) ENCODE ZSTD,
+   apportionment_nrx        numeric(22,7) ENCODE ZSTD,
+   category                 integer ENCODE ZSTD,
+   zip                      varchar(10) ENCODE ZSTD,
+   --Flags
+   brand_eligibility_flag   varchar(100) ENCODE ZSTD,
+   first_time_writer_flag      varchar(100) ENCODE ZSTD,
+   recurrent_writer_flag     varchar(100)   ENCODE ZSTD,
+   recurrent_writer_alt_flag    varchar(100)  ENCODE ZSTD,
+   plan_exclusion_flag			varchar (100)  ENCODE ZSTD,
+    datasource_id           varchar(30)     ENCODE ZSTD,
+	batch_id                       int     ENCODE ZSTD,
+   source_unique_id        varchar(30)     ENCODE ZSTD
+ 
+)
+DISTKEY(ptab_f_sales_xptrx_terr_id)
+COMPOUND SORTKEY (territory_type, market, therapeutic_class, therapeutic_sub_class, week_ending_date, day,  ptab_f_sales_xptrx_terr_id) 
+;
+--Loading Data Into Table In Sort Key Order
+   INSERT INTO :loadschema.ptab_f_sales_xptrx_terr_new
+(
+   xpt_trx_ins_niad_aob_id,
+       customer_id,
+       position_id,
+       product_id,
+       day_id,
+       poa_id,
+       plan_id,
+	   apportionment_niad_trx,
+       apportionment_niad_nrx,
+       apportionment_trx,
+       apportionment_nrx,
+	   territory_type,
+       market,
+       therapeutic_class,
+       therapeutic_sub_class,
+       week_ending_date,
+       "day",
+       category,
+       zip,
+       brand_eligibility_flag,
+       first_time_writer_flag,
+       recurrent_writer_flag,
+       recurrent_writer_alt_flag,
+	   plan_exclusion_flag   ,
+	   datasource_id,
+	   batch_id,
+		source_unique_id
+		
+  
+)
+  
+
+(
+--Recommend to use Even distribution or Key distribution on customer_id if customer_id is equally distributed over commonly used query domain
+--Pulling for non-market access Diabetes
+SELECT 
+   n.xptrx_ins_niad_unaligned_id  ,
+   NVL(n.customer_id , -99999)              ,
+   NVL(fca.position_id  , -99999)             ,
+   NVL(n.product_id   , -99999)              ,
+   n.week_id                   ,
+   poa2.poa_id                    ,
+   NVL(n.plan_id      , -99999)             ,
+   nvl(CAST(n.niad_trx * fca.apportionment_factor as numeric(22,7)), 0)  ,
+   nvl(CAST(n.niad_nrx * fca.apportionment_factor as numeric(22,7)), 0)   ,
+   nvl(CAST(n.trx * fca.apportionment_factor as numeric(22,7)), 0)       ,          
+   nvl(CAST(n.nrx * fca.apportionment_factor AS numeric(22,7)), 0)        ,
+   case when pos.salesforce_value LIKE '%_O' THEN pos.salesforce_value else pos.type end as territory_type ,
+   case when prh_hierarchy_lvl < 12
+  then prh_top_hl_prod_name 
+  end as market,
+  case when prh_hierarchy_lvl < 10
+  then prh_hl9_product_name 
+  end as therapeutic_class,
+   case when prh_hierarchy_lvl < 9
+  then prh_hl8_product_name 
+  end as therapeutic_sub_class,
+   day.d_split_week_ending_date,
+   day.d_day_dt,
+   n.category                  ,
+   n.zip                      ,
+   brand_eligibility_lov.value  ,
+   fst_tm_wrtr_flag_lov.value    ,
+   recurrent_writer_lov.value    ,
+   recurrent_writer_alt_lov.value  ,
+   plan_exclusion_lov.value         ,
+   n.datasource_id,
+   :batchid,
+   n.source_unique_id
+   
+  
+
+   
+FROM
+  :sourcefacts.f_sales_xptrx_ins_niad_unaligned n
+  INNER JOIN 
+  (SELECT fca.customer_id, fca.position_id, fca.poa_id, fca.alignment_level, fca.alignment_name, fca.sales_team, fca.apportionment_factor, fca.datasource_id, fca.overlay_position_id, fca.zip
+  from :sourcefacts.f_customer_alignment fca
+  group by fca.customer_id, fca.position_id, fca.poa_id, fca.alignment_level,  fca.sales_team, fca.alignment_name, fca.apportionment_factor, fca.datasource_id, fca.overlay_position_id, fca.zip)
+  fca on (fca.customer_id = n.customer_id)
+  INNER JOIN :sourcedims.d_poa poa2 ON (poa2.poa_id = fca.poa_id)
+  INNER JOIN :sourcedims.d_position pos ON (fca.position_id = pos.position_id)
+  INNER JOIN :sourcedims.d_position_hierarchy phi ON (pos.position_id = phi.position_id)
+  INNER JOIN :sourcedims.d_poa poa ON (phi.poa_id=poa.poa_id)
+  INNER JOIN :loadschema.ptab_d_product_full prod on prod.product_id = n.product_id
+  INNER JOIN :loadschema.ptab_d_day_full day on day.day_id = n.week_id
+  LEFT JOIN :sourcedims.d_lov brand_eligibility_lov on n.brand_eligibility_id = brand_eligibility_lov.lov_id and brand_eligibility_lov.type ='YES_NO_FLAG'
+  LEFT JOIN :sourcedims.d_lov fst_tm_wrtr_flag_lov on n.fst_tm_wrtr_flag_id = fst_tm_wrtr_flag_lov.lov_id and fst_tm_wrtr_flag_lov.type ='YES_NO_FLAG'
+  LEFT JOIN :sourcedims.d_lov recurrent_writer_lov on n.recurrent_writer_id = recurrent_writer_lov.lov_id and recurrent_writer_lov.type ='YES_NO_FLAG'
+  LEFT JOIN :sourcedims.d_lov recurrent_writer_alt_lov on n.recurrent_writer_alt_id = recurrent_writer_alt_lov.lov_id and recurrent_writer_alt_lov.type ='YES_NO_FLAG'
+  LEFT JOIN :sourcedims.d_lov plan_exclusion_lov on n.plan_exclusion_id = plan_exclusion_lov.lov_id and plan_exclusion_lov.type ='YES_NO_FLAG'
+  WHERE (poa.active_flag = 'CURRENT' and poa2.active_flag = 'CURRENT')   
+  and fca.alignment_level = 'TERRITORY' 
+  AND fca.datasource_id in ( 'PROF') 
+  and UPPER(poa2.type) like '%SALES%' 
+  --Using Position Hierarchy sales_force group instead of hard-coding sales force sources
+  and phi.sales_force in ( 
+  --Diabetes Data
+  'HSDE','DIABETES CARE') 
+
+
+UNION ALL
+
+--Pulling for non-market access anti-obesity
+SELECT 
+   n.xptrx_aob_unaligned_id  ,
+   n.customer_id               ,
+   fca.position_id               ,
+   n.product_id                ,
+   n.week_id                   ,
+   poa2.poa_id                    ,
+   n.plan_id                   ,
+   0  ,
+   0  ,
+   nvl(CAST(n.trx * fca.apportionment_factor as numeric(22,7)), 0)       ,          
+   nvl(CAST(n.nrx * fca.apportionment_factor AS numeric(22,7)), 0)        ,
+   case when pos.salesforce_value LIKE '%_O' THEN pos.salesforce_value else pos.type end as territory_type ,
+   case when prh_hierarchy_lvl < 12
+  then prh_top_hl_prod_name 
+  end as market,
+  case when prh_hierarchy_lvl < 10
+  then prh_hl9_product_name 
+  end as therapeutic_class,
+   case when prh_hierarchy_lvl < 9
+  then prh_hl8_product_name 
+  end as therapeutic_sub_class,
+   day.d_split_week_ending_date,
+   day.d_day_dt,
+   n.category                  ,
+   n.zip                      ,
+   brand_eligibility_lov.value  ,
+   fst_tm_wrtr_flag_lov.value    ,
+   recurrent_writer_lov.value    ,
+   recurrent_writer_alt_lov.value  ,
+     plan_exclusion_lov.value       ,
+	    n.datasource_id,
+		:batchid,
+   n.source_unique_id
+	 FROM
+  :sourcefacts.f_sales_xptrx_aob_unaligned n
+  INNER JOIN
+  (SELECT fca.customer_id, fca.position_id, fca.poa_id, fca.alignment_level, fca.sales_team, fca.alignment_name, fca.apportionment_factor, fca.datasource_id, fca.overlay_position_id, fca.zip
+  from :sourcefacts.f_customer_alignment fca
+  group by fca.customer_id, fca.position_id, fca.poa_id, fca.alignment_level,  fca.sales_team, fca.apportionment_factor, fca.alignment_name, fca.datasource_id, fca.overlay_position_id, fca.zip)
+  fca on (fca.customer_id = n.customer_id)
+  INNER JOIN :sourcedims.d_poa poa2 ON (poa2.poa_id = fca.poa_id)
+  INNER JOIN :sourcedims.d_position pos ON (fca.position_id = pos.position_id)
+  INNER JOIN :sourcedims.d_position_hierarchy phi ON (pos.position_id = phi.position_id)
+  INNER JOIN :sourcedims.d_poa poa ON (phi.poa_id=poa.poa_id)
+  INNER JOIN :loadschema.ptab_d_product_full prod on prod.product_id = n.product_id
+  INNER JOIN :loadschema.ptab_d_day_full day on day.day_id = n.week_id
+  LEFT JOIN :sourcedims.d_lov brand_eligibility_lov on n.brand_eligibility_id = brand_eligibility_lov.lov_id and brand_eligibility_lov.type ='YES_NO_FLAG'
+  LEFT JOIN :sourcedims.d_lov fst_tm_wrtr_flag_lov on n.fst_tm_wrtr_flag_id = fst_tm_wrtr_flag_lov.lov_id and fst_tm_wrtr_flag_lov.type ='YES_NO_FLAG'
+  LEFT JOIN :sourcedims.d_lov recurrent_writer_lov on n.recurrent_writer_id = recurrent_writer_lov.lov_id and recurrent_writer_lov.type ='YES_NO_FLAG'
+  LEFT JOIN :sourcedims.d_lov recurrent_writer_alt_lov on n.recurrent_writer_alt_id = recurrent_writer_alt_lov.lov_id and recurrent_writer_alt_lov.type ='YES_NO_FLAG'
+  LEFT JOIN :sourcedims.d_lov plan_exclusion_lov on n.plan_exclusion_id = plan_exclusion_lov.lov_id and plan_exclusion_lov.type ='YES_NO_FLAG'
+  WHERE (poa.active_flag = 'CURRENT' and poa2.active_flag = 'CURRENT')  
+  and fca.alignment_level = 'TERRITORY' 
+  AND fca.datasource_id in ( 'PROF') 
+  and UPPER(poa2.type) like '%SALES%' 
+   --Using Position Hierarchy sales_force group instead of hard-coding sales force sources
+  and phi.sales_force in ( 
+  --Obesity Data
+  'AOM','OEP')
+ )
+ ;
+ --Vacuuming and Analyzing to Speed Up Subsequent Market Access Load
+VACUUM FULL  :loadschema.ptab_f_sales_xptrx_terr_new to 99 PERCENT;
+ANALYZE :loadschema.ptab_f_sales_xptrx_terr_new;
+
+
+
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON :loadschema.ptab_f_sales_xptrx_terr_new TO :etluser;
+GRANT SELECT ON :loadschema.ptab_f_sales_xptrx_terr_new TO :readonlyusers;
+GRANT SELECT ON :loadschema.ptab_f_sales_xptrx_terr_new TO :readonlygroups;
+
+
+--Creating a dummy entry so below doesn't fail if old table does not exist.
+CREATE TABLE IF NOT EXISTS :loadschema.ptab_f_sales_xptrx_terr
+(
+   customer_id           bigint  ENCODE ZSTD NOT NULL
+);
+
+
+
+ALTER TABLE :loadschema.ptab_f_sales_xptrx_terr RENAME TO ptab_f_sales_xptrx_terr_old;
+
+ALTER TABLE :loadschema.ptab_f_sales_xptrx_terr_new RENAME TO ptab_f_sales_xptrx_terr;
+
+
+--Updating latest run stats to apollo control table
+UPDATE rpt_apollo.apollo_control_table
+set status = 'Successfully Completed', batch_id = :batchid, last_loaded_date = getdate() ,total_records_loaded =  (SELECT count(*) from :loadschema.ptab_f_sales_xptrx_terr)
+WHERE sql_file_name = :'sqlfilename';

@@ -1,0 +1,34 @@
+CREATE OR REPLACE VIEW rpt_apollo.v_tab_Account_with_Affiliation_Attributes AS
+(SELECT 
+account_id,
+acc_hcos_id as "hcos Id",
+acc_source_unique_id as "CDM Id",
+acc_subtype_code as "CDM Subtype",
+acc_type_code as "CDM Type",
+ahi_top_lvl_accnt_id as "IDN Id",
+ahi_top_lvl_accnt_name as IDN,
+CASE when aff_level not in ('CORP PARENT','UNAFFILIATED CORP PARENT')
+then ahi_lvl8anc_accnt_id end as "Division Id",
+CASE when aff_level not in ('CORP PARENT','UNAFFILIATED CORP PARENT')
+then ahi_lvl8anc_accnt_name end as Division,
+CASE when aff_level not in ('CORP PARENT','UNAFFILIATED CORP PARENT','SUB DIVISION','UNAFFILIATED SUB DIVISION')
+then ahi_lvl7anc_accnt_id end as "Facility Id",
+CASE when aff_level not in ('CORP PARENT','UNAFFILIATED CORP PARENT','SUB DIVISION','UNAFFILIATED SUB DIVISION')
+then ahi_lvl7anc_accnt_name end as Facility,
+acc.aff_customer_id as customer_id,
+affiliation_deduplication_id
+FROM  rpt_apollo.ptab_d_account_full acc
+where aff_level in ('SUB DIVISION','UNAFFILIATED SUB DIVISION','CORP PARENT','UNAFFILIATED CORP PARENT','FACILITY','UNAFFILIATED FACILITY')
+)
+WITH NO SCHEMA BINDING;
+
+-- Granting read only access to read group and full control to ETL user
+
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.v_tab_Account_with_Affiliation_Attributes TO oasis_cdw_tst_procuser;
+GRANT SELECT ON rpt_apollo.v_tab_Account_with_Affiliation_Attributes TO group oasis_cdw_tst_readuser_group;
+
+-- Check for Compile of VIEW
+SELECT *
+FROM rpt_apollo.v_tab_Account_with_Affiliation_Attributes
+LIMIT 1;
+

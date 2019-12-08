@@ -1,0 +1,40 @@
+DROP VIEW IF EXISTS rpt_apollo.v_tab_Prescriber_History_NBrx;
+
+CREATE VIEW rpt_apollo.v_tab_Prescriber_History_NBrx AS
+(
+SELECT 
+       nbrx_unaligned_id
+       poa_id,
+       apportionment_nbrx as "Apportionment NBRx",
+       apportionment_ltrx as "Apportionment LTRx",
+       source_of_business as "Source of Business",
+       brand_eligibility_flag as "Brand Eligibility Flag",
+-- For performance on Redshift the most commonly and highly specific attributes have been added directly to the performance fact tables	   
+  nbrx.market as "Market",
+  nbrx.therapeutic_class as "Therapeutic Class",
+ nbrx.therapeutic_sub_class as "Therapeutic Sub-Class",
+ nbrx.territory_type as "Territory Type" ,
+ nbrx.week_ending_date as "Week Ending Date",
+ nbrx.day as "Day",
+ product_id,
+ from_product_id,
+ customer_id,
+ day_id,
+ position_id,
+ 0 as overlay_deduplication_factor,
+   0 as overlay_position_id
+FROM rpt_apollo.ptab_f_sales_nbrx_terr nbrx
+where    dynamics_type_id  <> 47
+
+)
+WITH NO SCHEMA BINDING;
+
+GRANT TRIGGER, RULE, SELECT, DELETE, UPDATE, REFERENCES, INSERT ON rpt_apollo.v_tab_Prescriber_History_NBrx TO oasis_cdw_tst_procuser;
+GRANT SELECT ON rpt_apollo.v_tab_Prescriber_History_NBrx TO group oasis_cdw_tst_readuser_group;		
+
+-- Check for Compile of VIEW
+SELECT *
+FROM rpt_apollo.v_tab_Prescriber_History_NBrx
+LIMIT 1;
+
+

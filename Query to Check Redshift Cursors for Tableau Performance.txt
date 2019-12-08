@@ -1,0 +1,18 @@
+SELECT
+    usr.usename                                     AS username
+  , min(cur.starttime)                              AS start_time
+  , DATEDIFF(second, min(cur.starttime), getdate()) AS run_time
+  , min(cur.row_count)                           AS row_count
+  , min(cur.fetched_rows)                           AS fetched_rows
+  , listagg(util_text.text)
+    WITHIN GROUP (ORDER BY sequence)                AS query
+FROM STV_ACTIVE_CURSORS cur
+  left JOIN stl_utilitytext util_text
+    ON cur.pid = util_text.pid AND cur.xid = util_text.xid
+  left JOIN pg_user usr
+    ON usr.usesysid = cur.userid
+GROUP BY usr.usename, util_text.xid;
+
+
+select query, starttime, trim(querytxt) as sqlquery
+from stl_query
