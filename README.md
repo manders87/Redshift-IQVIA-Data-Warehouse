@@ -1,9 +1,14 @@
 ###Redshift Deployment for IQVIA Data Warehouse
 
 Data Profiles:
+
 - Facts: IQVIA Sales - Nbrx & XPtrx
-- Faces: Internal Sales Activity
-- Common Dimensions
+Sales data comes from IQVIA, the pharmaceutical industry standard reporting organization.  XPTRx, exponent track plan prescriptions, shows total volume of prescriptions written by a prescriber.  NBRx, new to brand prescriptions, is a newer metric that takes into account if a prescription has been written for a patient within the last 52 weeks if it has not then they are considered "new to brand". 
+
+- Facts: Internal Sales Activity
+Activity fact data takes into account the myriad of sales actions taken that ultimately drive the sales listed above.  Activity can include phone calls, physician visits, presentations, and emails for example.
+
+Common Dimensions:
   - Customers & Account and Affiliations Between
   - Managed Care Plan
   - Time: Day
